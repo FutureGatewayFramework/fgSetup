@@ -77,7 +77,7 @@ FGAPISERVER_VARS="FGAPISERVER_SETUP\
                   FGAPISERVER_PTVMAPFILE\
                   FGAPISERVER_PTVUSER\
                   FGAPISERVER_PTVPASS"
-FGAPISERVER_SETUP=1                     # Enable this flag to setup fgAPIServer
+FGAPISERVER_SETUP=0                     # Enable this flag to setup fgAPIServer
 FGAPISERVER_HOST=127.0.0.1              # fgAPIServer server host address
 FGAPISERVER_APPHOST=0.0.0.0             # fgAPIServer server host address
 FGAPISERVER_APPHOSTUNAME=futuregateway  # fgAPIServer host username 
@@ -153,7 +153,7 @@ APISERVERDAEMON_ENVS="APISERVERDAEMON_SETUP\
                       TOSCAIDC_FGAPISRV_PTVENDPOINT\
                       TOSCAIDC_FGAPISRV_PTVUSER\
                       TOSCAIDC_FGAPISRV_PTVPASS"
-APISERVERDAEMON_SETUP=1                 # Enable this flag to setup APIServerDaemon
+APISERVERDAEMON_SETUP=0                 # Enable this flag to setup APIServerDaemon
 APISERVERDAEMON_HOST=127.0.0.1          # APIServerDaemon host address
 APISERVERDAEMON_HOSTUNAME=futuregateway # APIServerDaemon host username
 APISERVERDAEMON_PORT=8080               # APIServerDaemon port number
@@ -275,7 +275,7 @@ FGPORTAL_LIFERAY7_ENVS="FGPORTAL_LIFERAY7
                         FGPORTAL_LIFERAY7_SDK\
                         FGPORTAL_LIFERAY62_GITREPO\
                         FGPORTAL_LIFERAY62_GITTAG"
-FGPORTAL_LIFERAY7_SETUP=1                # Enable this flag to support Liferay7 setup
+FGPORTAL_LIFERAY7_SETUP=0                # Enable this flag to support Liferay7 setup
 FGPORTAL_LIFERAY7_HOST=127.0.0.1         # Liferay7 portal host address
 FGPORTAL_LIFERAY7_HOSTUNAME=liferayadmin # Liferay7 portal host username
 FGPORTAL_LIFERAY7_PORT=8080              # Liferay7 portal port number
