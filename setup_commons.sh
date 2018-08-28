@@ -323,9 +323,9 @@ ssh_command() {
     
     # Execute SSH command
     CMD="$SSH ""$SSHOPTS"" -l $SSH_USER $SSH_HOST -p $SSH_PORT \"$SSHCOMMAND\""
-	#out "$CMD" 1 1
-	eval $CMD 2>$SSHERR >$SSHOUT
-	RES=$?
+    #out "$CMD" 1 1
+    eval $CMD 2>$SSHERR >$SSHOUT
+    RES=$?
     return $RES
 }
 

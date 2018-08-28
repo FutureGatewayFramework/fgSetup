@@ -139,48 +139,67 @@ if [ ! -f $HOME/.bash_profile -o $(cat $HOME/.bash_profile | grep FGLOADENV | wc
 fi
 EOF
 	if [ "$SETUP_FLAG" -ne 0 ]; then
-	     RES_1=1 &&
-             RES_2=1 &&
-             RES_3=1 &&
+             RES=0
+
+             [ $RES -eq 0 ] &&
 	     out "Checking '"$SETUP_SERVICE"' host connection ... " 1 &&
-	         ssh_command $SETUP_SERVICE "whoami" $SSH_OUT $SSH_ERR && 
-	         out "passed" 0 1 &&
+	     ssh_command $SETUP_SERVICE "whoami" $SSH_OUT $SSH_ERR && 
+	     out "passed" 0 1 && RES=0 || RES=1
+
+             [ $RES -eq 0 ] &&
 	     out "Checking '"$SETUP_SERVICE"' passwordless sudo ... " 1 &&   
-	         ssh_command $SETUP_SERVICE "sudo -n true" $SSH_OUT $SSH_ERR && 
-	         out "passed" 0 1 &&
-	     out "Determining '"$SETUP_SERVICE"' package manager ... " 1 &&	         
-	         ssh_command $SETUP_SERVICE "which apt-get || which yum || ([ \"\$(uname -s)\" = \"Darwin\" ] && echo \"brew\") || echo \"unsupported\"" $SSH_OUT $SSH_ERR "-n -o \"StrictHostKeyChecking no\" -o \"BatchMode=yes\"" &&
-	         PKGMGR=$(cat $SSH_OUT) &&
-	         out "passed ("$PKGMGR")" 0 1 &&
+	     ssh_command $SETUP_SERVICE "sudo -n true" $SSH_OUT $SSH_ERR && 
+	     out "passed" 0 1 && RES=0 || RES=1
+	     
+             [ $RES -eq 0 ] &&
+             out "Determining '"$SETUP_SERVICE"' package manager ... " 1 &&	         
+	     ssh_command $SETUP_SERVICE "which apt-get || which yum || ([ \"\$(uname -s)\" = \"Darwin\" ] && echo \"brew\") || echo \"unsupported\"" $SSH_OUT $SSH_ERR "-n -o \"StrictHostKeyChecking no\" -o \"BatchMode=yes\"" &&
+	     PKGMGR=$(cat $SSH_OUT) &&
+	     out "passed ("$PKGMGR")" 0 1 && RES=0 || RES=1
+
+             [ $RES -eq 0 ] &&
              echo $SETUP_SERVICE" "$(cat $SSH_OUT) >> $SERVICE_PKGMGR &&
              out "Setting up FutureGateway environment settings for service '"$SETUP_SERVICE"' ..." 1 &&
-                 ssh_sendfile $SETUP_SERVICE "$MKPROFILESCRIPT" "$MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
-                 ssh_command $SETUP_SERVICE "chmod +x $MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
-                 ssh_command $SETUP_SERVICE "./$MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
-                 ssh_command $SETUP_SERVICE "rm -f ./$MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
-             out "done" 0 1 &&
+             ssh_sendfile $SETUP_SERVICE "$MKPROFILESCRIPT" "$MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
+             ssh_command $SETUP_SERVICE "chmod +x $MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
+             ssh_command $SETUP_SERVICE "./$MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
+             ssh_command $SETUP_SERVICE "rm -f ./$MKPROFILESCRIPT" $SSH_OUT $SSH_ERR &&
+             out "done" 0 1 && RES=0 || RES=1
+
+             [ $RES -eq 0 ] &&
              out "Sending setup_commons files to the host ... " 1 &&
-                 ssh_sendfile $SETUP_SERVICE "setup_commons.sh" ".fgprofile/commons" $SSH_OUT $SSH_ERR && RES_1=0
-             [ $RES_1 -eq 0 ] && out "done" 0 1 
+             ssh_sendfile $SETUP_SERVICE "setup_commons.sh" ".fgprofile/commons" $SSH_OUT $SSH_ERR &&
+             out "done" 0 1 &&  RES=0 || RES=1
+             
+             if [ $RES -eq 0 ]; then 
+               out "Sending package manager specific files to the host ... " 1 &&
+               
+               [ "$PKGMGR" = "brew" ] &&  out "(brew) " 1 &&
+               ssh_sendfile $SETUP_SERVICE "setup_brew_commons.sh" ".fgprofile/brew_commons" $SSH_OUT $SSH_ERR &&
+               RES=0 || RES=1
+               
+               ["$PKGMGR" = "apt-get" ] && out "(apt-get) " 1 &&
+               ssh_sendfile $SETUP_SERVICE "setup_apt_commons.sh" ".fgprofile/apt_commons" $SSH_OUT $SSH_ERR &&
+               RES=0 || RES=1
 
-             out "Sending package manager specific files to the host ... " 1 &&
-             [ $RES_1 -eq 0 -a "$PKGMGR" = "brew" ] && out "(brew) " 1 &&
-                 ssh_sendfile $SETUP_SERVICE "setup_brew_commons.sh" ".fgprofile/brew_commons" $SSH_OUT $SSH_ERR && RES_2=0
-             [ $RES_1 -eq 0 -a "$PKGMGR" = "apt-get" ] && out "(apt-get) " 1 &&
-                 ssh_sendfile $SETUP_SERVICE "setup_apt_commons.sh" ".fgprofile/apt_commons" $SSH_OUT $SSH_ERR && RES_2=0
-             [ $RES_1 -eq 0 -a "$PKGMGR" = "yum" ] && out "(yum) " 1 &&
-                 ssh_sendfile $SETUP_SERVICE "setup_yum_commons.sh" ".fgprofile/yum_commons" $SSH_OUT $SSH_ERR && RES_2=0
-             [ $RES_1 -eq 0 ] && out "passed" 0 1 && RES_2=0
+               [ "$PKGMGR" = "yum" ] && out "(yum) " 1 &&
+               ssh_sendfile $SETUP_SERVICE "setup_yum_commons.sh" ".fgprofile/yum_commons" $SSH_OUT $SSH_ERR &&
+               RES=0 || RES=1
+             fi
+             [ $RES -eq 0 ] && out "passed" 0 1 
 
+             [ $RES -eq 0 ] &&
              out "Sending setup_config.sh file to the host ... " 1 &&    
-             [ $RES_1 -eq 0 -a  $RES_2 -eq 0 ] && 
-                 ssh_sendfile $SETUP_SERVICE "setup_config.sh" ".fgprofile/config" $SSH_OUT $SSH_ERR && RES_3=0 
-             [ $RES_3 -eq 0 ] && out "done" 0 1 && RES=$((RES_1+RES_2+RES_3))
+             ssh_sendfile $SETUP_SERVICE "setup_config.sh" ".fgprofile/config" $SSH_OUT $SSH_ERR &&
+             RES=0 || RES=1 
+             [ $RES -eq 0 ] && out "done" 0 1
         fi
 
 	if [ $RES -ne 0 ]; then
 	    out "failed" 0 1 
-	    err "Failing $SETUP_SERVICE host checking; ssh output and error files below"
+	    err "Failing $SETUP_SERVICE host checking; command, ssh output and error files below"
+            err "CMD: "
+            err "$CMD"
 	    err "SSH Output:"
 	    err "$(cat $SSH_OUT)"
 	    err "SSH Error:"
