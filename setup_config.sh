@@ -77,7 +77,7 @@ FGAPISERVER_VARS="FGAPISERVER_SETUP\
                   FGAPISERVER_PTVMAPFILE\
                   FGAPISERVER_PTVUSER\
                   FGAPISERVER_PTVPASS"
-FGAPISERVER_SETUP=0                     # Enable this flag to setup fgAPIServer
+FGAPISERVER_SETUP=1                     # Enable this flag to setup fgAPIServer
 FGAPISERVER_HOST=127.0.0.1              # fgAPIServer server host address
 FGAPISERVER_APPHOST=0.0.0.0             # fgAPIServer server host address
 FGAPISERVER_APPHOSTUNAME=futuregateway  # fgAPIServer host username 
