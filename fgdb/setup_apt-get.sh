@@ -57,14 +57,6 @@ if [ ! -d /home/$FGDB_HOSTUNAME ]; then
 fi
 
 # Mandatory packages installation
-APT_GET=$(which apt-get)
-if [ "$APT_GET" = "" ]; then
-  out "Did not find apt-get package manager"
-  exit 1
-fi
-out "APT is on: '"$APT"'"
-out "Installing packages ..."
-
 APTPACKAGES=(
   git
   wget
@@ -72,8 +64,7 @@ APTPACKAGES=(
   jq
   mysql-server
 )
-sudo apt-get update &&\
-sudo apt-get install -y ${APTPACKAGES[@]} 
+install_apt ${APTPACKAGES[@]} 
 RES=$?
 
 # Continue only if packages have been installed correctly
