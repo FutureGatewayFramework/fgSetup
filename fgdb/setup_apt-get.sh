@@ -7,6 +7,7 @@
 
 source .fgprofile/commons
 source .fgprofile/config
+source .fgprofile/apt_commons
 
 FGLOG=$HOME/fgdb.log
 
@@ -103,7 +104,6 @@ if [ $RES -eq 0 ]; then
         
     #Check connectivity
     out "Checking mysql connectivity ... " 1
-    out "$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root "
     $MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ "$FGDB_ROOTPWD" != "" ] && echo "-p$FGDB_ROOTPWD") -e "select version()" >/dev/null 2>/dev/null
     RES=$?
     if [ $RES -ne 0 ]; then
@@ -224,18 +224,14 @@ fi
 #
 # Global FG  profile
 # 
-if [ ! -f /etc/profile.d/fg_profile.sh ]; then
-  out "Installing global FG profile"
-  FGPROFILE=$(mktemp -t stderr.XXXXXX)
-  TEMP_FILES+=( $FGPROFILE )
-  cat >$FGPROFILE <<EOF
-    echo "for f in \\\$(find $FG_DIR/.fgprofile -type f); do source \\\$f; done # FGLOADENV" > /etc/profile.d/fg_profile.sh
+out "Installing global FG profile"
+FGPROFILE=$(mktemp -t stderr.XXXXXX)
+TEMP_FILES+=( $FGPROFILE )
+cat >$FGPROFILE <<EOF
+  echo "for f in \\\$(find $HOME/.fgprofile -type f); do source \\\$f; done # FGLOADENV" > /etc/profile.d/fg_profile.sh
 EOF
-  chmod +x $FGPROFILE
-  sudo su - -c "$FGPROFILE"
-else
-  out "Global profile altready present"
-fi
+chmod +x $FGPROFILE
+sudo su - -c "$FGPROFILE"
 
 # Report installation termination
 if [ $RES -ne 0 ]; then
@@ -243,6 +239,6 @@ if [ $RES -ne 0 ]; then
 else
   OUTMODE="Successfully"
 fi
-out "$OUTMODE finished FutureGateway database brew versioned setup script"
+out "$OUTMODE finished FutureGateway database apt-get versioned setup script"
 exit $RES
 
