@@ -215,15 +215,26 @@ if [ $RES -eq 0 ]; then
 #
 # Author: Riccardo Bruno <riccardo.bruno@ct.infn.it>
 EOF
-   #for vgdbvar in ${FGDB_VARS[@]}; do
-   #    echo "$vgdbvar=${!vgdbvar}" >> $FGDBENVFILEPATH
-   #done
-   ## Now place functions from setup_commons.sh
-   #declare -f asdb  >> $FGDBENVFILEPATH
-   #declare -f asdbr >> $FGDBENVFILEPATH
-   #declare -f dbcn  >> $FGDBENVFILEPATH
-   #out "done" 0 1
+   for vgdbvar in ${FGDB_VARS[@]}; do
+       echo "$vgdbvar=${!vgdbvar}" >> $FGDBENVFILEPATH
+   done
    out "User profile successfully created"
+fi
+
+#
+# Global FG  profile
+# 
+if [ ! -f /etc/profile.d/fg_profile.sh ]; then
+  out "Installing global FG profile"
+  FGPROFILE=$(mktemp -t stderr.XXXXXX)
+  TEMP_FILES+=( $FGPROFILE )
+  cat >$FGPROFILE <<EOF
+    echo "for f in \\\$(find $FG_DIR/.fgprofile -type f); do source \\\$f; done # FGLOADENV" > /etc/profile.d/fg_profile.sh
+EOF
+  chmod +x $FGPROFILE
+  sudo su - -c "$FGPROFILE"
+else
+  out "Global profile altready present"
 fi
 
 # Report installation termination
