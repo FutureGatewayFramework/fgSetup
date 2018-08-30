@@ -5,7 +5,7 @@
 # Author: Riccardo Bruno <riccardo.bruno@ct.infn.it>
 #
 
-
+# Install package list using apt-get
 install_apt() {
   APTPACKAGES=$@
 
@@ -21,5 +21,23 @@ install_apt() {
   sudo $APT_GET install -y $APTPACKAGES
   RES=$?
 
+  return $RES
+}
+
+# Check for FutureGateway fgdb unix user
+check_and_create_user() {
+  HOSTUNAME=$1
+
+  if [ ! -d /home/$HOSTUNAME ]; then
+    sudo adduser --disabled-password --gecos "" $HOSTUNAME
+    RES=$?
+    if [ $RES -eq 0 ]; then
+      out "User $HOSTUNAME added successfully"
+    else
+      out "Unable to add user: $FGDB_HOSTUNAME"
+      exit 1
+    fi
+  fi
+  
   return $RES
 }

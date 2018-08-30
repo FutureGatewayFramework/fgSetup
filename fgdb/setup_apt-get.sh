@@ -45,16 +45,7 @@ out "Starting FutureGateway database apt-get versioned setup script"
 out "Verifying package manager and fgdb user ..."
 
 # Check for FutureGateway fgdb unix user
-if [ ! -d /home/$FGDB_HOSTUNAME ]; then
-  sudo adduser --disabled-password --gecos "" $FGDB_HOSTUNAME
-  RES=$?
-  if [ $RES -eq 0 ]; then
-    out "User $FGDB_HOSTUNAME added successfully"
-  else
-    out "Unable to add user: $FGDB_HOSTUNAME"
-    exit 1
-  fi
-fi
+check_and_create_user $FGDB_HOSTUNAME
 
 # Mandatory packages installation
 APTPACKAGES=(
