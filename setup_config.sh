@@ -17,7 +17,7 @@ FGLOG=$HOME/FutureGateway_setup.log            # If empty std-out only reporting
 # properly before to execute the setup
 GIT_HOST=https://github.com                   # Git repository host
 GIT_RAWHOST=https://raw.githubusercontent.com # Host address for raw content
-GIT_REPO=FutureGateway                        # FutureGateway repositoty name
+GIT_REPO=FutureGatewayFramework               # FutureGateway repositoty name
 GIT_BASE=$GIT_HOST/$GIT_REPO                  # GitHub base repository endpoint
 GIT_BASERAW=$GIT_RAWHOST/$GIT_REPO            # GitHub base for raw content
 
@@ -47,7 +47,7 @@ FGDB_USER=fgapiserver                # Database username
 FGDB_PASSWD=fgapiserver_password     # Database username password
 FGDB_SSHPORT=22                      # Database ssh port number
 FGDB_GITREPO=fgAPIServer             # Database Git repository name
-FGDB_GITTAG="minor_changes"          # Database Git repository tag/branch name
+FGDB_GITTAG="EnvConfig"              # Database Git repository tag/branch name
 
 
 # API front-end
@@ -61,6 +61,7 @@ FGDB_GITTAG="minor_changes"          # Database Git repository tag/branch name
 # fgAPIServer
 # This component requires the following variables
 FGAPISERVER_VARS="FGAPISERVER_SETUP\
+                  FGAPISERVER_NAME\
                   FGAPISERVER_APPHOST\
                   FGAPISERVER_APPHOSTUNAME\
                   FGAPISERVER_PORT\
@@ -70,14 +71,19 @@ FGAPISERVER_VARS="FGAPISERVER_SETUP\
                   FGAPISERVER_GITTAG\
                   FGAPISERVER_IOPATH\
                   FGAPISERVER_APIVER\
+                  FGAPISERVER_LOGCFG\
+                  FGAPISERVER_JSONINDENT\
                   FGAPISERVER_DEBUG\
                   FGAPISERVER_NOTOKEN\
                   FGAPISERVER_PTVFLAG\
                   FGAPISERVER_PTVENDPOINT\
                   FGAPISERVER_PTVMAPFILE\
                   FGAPISERVER_PTVUSER\
-                  FGAPISERVER_PTVPASS"
+                  FGAPISERVER_PTVPASS\
+                  FGAPISERVER_CRT\
+                  FGAPISERVER_KEY"
 FGAPISERVER_SETUP=1                     # Enable this flag to setup fgAPIServer
+FGAPISERVER_NAME=fgapiserver            # fgAPIServer Flask app name 
 FGAPISERVER_HOST=127.0.0.1              # fgAPIServer server host address
 FGAPISERVER_APPHOST=0.0.0.0             # fgAPIServer server host address
 FGAPISERVER_APPHOSTUNAME=futuregateway  # fgAPIServer host username 
@@ -85,9 +91,11 @@ FGAPISERVER_PORT=8888                   # fgAPIServer port number (no WSGI)
 FGAPISERVER_SSHPORT=22                  # fgAPIServer ssh port number
 FGAPISERVER_WSGI=1                      # 0 turn off WSGI configuration (apache)
 FGAPISERVER_GITREPO=fgAPIServer         # fgAPIServer Git repository name
-FGAPISERVER_GITTAG="master"             # fgAPIServer Git repository tag/branch name
+FGAPISERVER_GITTAG="EnvConfig"          # fgAPIServer Git repository tag/branch name
 FGAPISERVER_IOPATH=/tmp                 # fgAPIServer I/O sandbox directory
 FGAPISERVER_APIVER=1.0                  # FutureGateway API version implemented
+FGAPISERVER_LOGCFG=fgapiserver_log.conf # API Server log configuration file
+FGAPISERVER_JSONINDENT=4                # API json output indentation
 FGAPISERVER_DEBUG=True                  # Enable/Disable fgAPIServer debug mode
 FGAPISERVER_NOTOKEN=False               # Enable/Disable token mechanism
 FGAPISERVER_PTVFLAG=True                # Enable/Disable PTV (token mode on)
@@ -95,6 +103,8 @@ FGAPISERVER_PTVUSER="tokenver_user"     # PTV HTTP access service username
 FGAPISERVER_PTVPASS="tokenver_pass"     # PTV HTTP service password
 FGAPISERVER_PTVENDPOINT="http://$FGAPISERVER_HOST:8889/checktoken" 
 FGAPISERVER_PTVMAPFILE="fgapiserver_ptvmap.json"
+FGAPISERVER_CRT=
+FGAPISERVER_KEY=
 
 # APIServer
 #

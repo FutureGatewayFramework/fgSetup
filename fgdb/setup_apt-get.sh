@@ -27,6 +27,46 @@ cleanup_tempFiles() {
   done
 }
 
+# Report CMD failure
+done_or_report_fail() {
+  if [ $RES -ne 0 ]; then
+    out "failed" 0 1
+    out "ERROR: \"$1\"" 
+    out "Command: \"$CMD\""
+    out "Output:"
+    out "$(cat $CMD_OUT)"
+    out "Error:"
+    out "$(cat $CMD_ERR)"
+    exit 1
+ else
+    out "done$2" 0 1  
+ fi
+}
+
+# DB settings configuration
+configure_db_settings() {
+    RES=1
+
+    get_ts
+    cp fgapiserver_db.sql fgapiserver_db.sql_$TS
+
+    sed -i "s/drop\ database\ if\ exists\ fgapiserver;/drop\ database\ if\ exists\ $FGDB_NAME;/"  fgapiserver_db.sql &&\
+    sed -i "s/create\ database\ fgapiserver;/create\ database\ $FGDB_NAME;/" fgapiserver_db.sql &&\
+# FG user@%
+    sed -i "s/create\ user\ 'fgapiserver'\@'%'/create\ user\ '$FGDB_USER'\@'%'/" fgapiserver_db.sql &&\
+    sed -i "s/alter\ user\ 'fgapiserver'\@'%'\ identified\ by\ \"fgapiserver_password\";/alter\ user\ 'fgapiserver'\@'%'\ identified\ by\ \"$FGDB_PASSWD\";/" fgapiserver_db.sql &&\
+    sed -i "s/on\ fgapiserver.\*/on\ $FGDB_NAME.\*/" fgapiserver_db.sql &&\
+    sed -i "s/to\ 'fgapiserver'\@'%'/to\ '$FGDB_USER'\@'%'/" fgapiserver_db.sql &&\
+# FG user@localhost
+    sed -i "s/create\ user\ 'fgapiserver'\@'localhost'/create\ user\ '$FGDB_USER'\@'localhost'/" fgapiserver_db.sql &&\
+    sed -i "s/alter\ user\ 'fgapiserver'\@'localhost'\ identified\ by\ \"fgapiserver_password\";/alter\ user\ 'fgapiserver'\@'localhost'\ identified\ by\ \"$FGDB_PASSWD\";/" fgapiserver_db.sql &&\
+    sed -i "s/on\ fgapiserver.\*/on\ $FGDB_NAME.\*/" fgapiserver_db.sql &&\
+    sed -i "s/to\ 'fgapiserver'\@'localhost'/to\ '$FGDB_USER'\@'localhost'/" fgapiserver_db.sql &&\
+    RES=0
+
+    return $RES
+}
+
 #
 # Script body
 #
@@ -39,6 +79,10 @@ STD_OUT=$(mktemp -t stdout.XXXXXX)
 STD_ERR=$(mktemp -t stderr.XXXXXX)
 TEMP_FILES+=( $STD_OUT )
 TEMP_FILES+=( $STD_ERR )
+CMD_OUT=$(mktemp -t stdout.XXXXXX)
+CMD_ERR=$(mktemp -t stderr.XXXXXX)
+TEMP_FILES+=( $CMD_OUT )
+TEMP_FILES+=( $CMD_ERR )
 
 out "Starting FutureGateway database apt-get versioned setup script"
 
@@ -49,6 +93,7 @@ check_and_create_user $FGDB_HOSTUNAME
 
 # Mandatory packages installation
 APTPACKAGES=(
+  curl
   git
   wget
   coreutils
@@ -62,133 +107,106 @@ RES=$?
 if [ $RES -eq 0 ]; then
     out "Starting mysql service ... " 1
     # Using restart since mysql could be already running
-    sudo service mysql start 2>$STD_ERR >$STD_OUT
+    CMD="sudo service mysql start 2>$CMD_ERR >$CMD_OUT"
+    eval $CMD >$CMD_OUT 2>$CMD_ERR
     RES=$?
-    if [ $RES -ne 0 ]; then
-        out "failed" 0 1
-        out "Output:"
-        out "$(cat $STD_ERR)"
-        out "Error:"
-        out "$(cat $STD_ERR)"
-    else
-        out "done" 0 1    
-    fi
+    done_or_report_fail "Unable to start mysql service"
     
     # Check mysql client
     out "Looking up mysql client ... " 1
-    MYSQL=$(which mysql)
-    if [ "$MYSQL" = "" ]; then
-      out "failed" 0 1
-      out "Did not find mysql command"
-      exit 1
-    fi
+    CMD="MYSQL=\$(which mysql)"
+    eval $CMD >$CMD_OUT 2>$CMD_ERR 
+    done_or_report_fail "Did not find mysql command"
     out "done ($MYSQL)" 0 1
         
     #Check connectivity
     out "Checking mysql connectivity ... " 1
-    $MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ "$FGDB_ROOTPWD" != "" ] && echo "-p$FGDB_ROOTPWD") -e "select version()" >/dev/null 2>/dev/null
-    RES=$?
-    if [ $RES -ne 0 ]; then
-        out "failed" 0 1
-        out "Missing mysql connectivity"
-        exit 1
-    fi
+    CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
+    eval $CMD >$CMD_OUT 2>$CMD_ERR 
+    done_or_report_fail "Missing mysql connectivity"
     out "done" 0 1    
 fi
 
 # Getting or updading software from Git (database in fgAPIServer repo)
-git_clone_or_update "$GIT_BASE" "$FGAPISERVER_GITREPO" "$FGAPISERVER_GITTAG"
+CMD="git_clone_or_update \"$GIT_BASE\" \"$FGAPISERVER_GITREPO\" \"$FGAPISERVER_GITTAG\""
+eval $CMD >$CMD_OUT 2>$CMD_ERR
 RES=$?
-if [ $RES -ne 0 ]; then
-   out "ERROR: Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
-   exit 1
-fi 
+done_or_report_fail "Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
 
 # Environment setup
-if [ $RES -eq 0 ]; then
 
-   out "Preparing the environment ..."
+out "Preparing the environment ..."
    
-   # Check for db mandatory functions
-   out "Checking for mysql macro functions ... "
-   out "  asdbr ... " 1   
-   declare -F asdbr &>/dev/null && out "found" 0 1 || (echo "not found" 0 1; RES=1)
-   out "  asdb ... " 1
-   declare -F asdb &>/dev/null && out "found" 0 1 || (echo "not found" 0 1; RES=1)
-   out "  dbcn ... " 1
-   declare -F dbcn &>/dev/null && out "found" 0 1 || (echo "not found" 0 1; RES=1)
-   if [ $RES -ne 0 ]; then
-       out "Macro function test check failed!"
-       out "At lease one of the mandatory functions is missing"
-       exit 1
-   fi
-   ASDB_OPTS="-sN"
+# Check for db mandatory functions
+out "Checking for mysql macro functions ... "
+out "  asdbr ... " 1   
+declare -F asdbr &>/dev/null && out "found" 0 1 || (echo "asdbr not found" 0 1; RES=1)
+out "  asdb ... " 1
+declare -F asdb &>/dev/null && out "found" 0 1 || (echo "asdb not found" 0 1; RES=1)
+out "  dbcn ... " 1
+declare -F dbcn &>/dev/null && out "found" 0 1 || (echo "dbcn not found" 0 1; RES=1)
+done_or_report_fail "Macro function test check failed; at lease one of the mandatory functions is missing"
 
-   out "Checkig APIServer database exists ... " 1
-   ASDB_OPTS="-sN"
-   ASDBCOUNT=$(asdbr "select count(*) from information_schema.schemata where schema_name = 'fgapiserver';")
-   RES=$?
-   if [ $RES -ne 0 ]; then
-       out "failed" 0 1
-       out "Did not check if APIServer database exists"
-       exit 1
-   else
-       out "done" 0 1
-       if [ $ASDBCOUNT -ne 0 ]; then
-           # Database exists; determine version and patch
-           out "APIServerDatabase exists; deterimne its version ... " 1
-           ASDBVER=$(asdb "select version from db_patches order by 1 desc limit 1;")
-           RES=$?
-           if [ $RES -ne 0 ]; then
-               out "failed" 0 1
-               out "Did not check if APIServerDatabase exists"
-               exit 1
-           fi
-           # Database exists; it's time to update it
-           out "done ($ASDBVER)" 0 1
-           out "Attempting to patch APIServer database ... " 
-           cd $FGDB_GITREPO/db_patches
-           # Following replace_line statement are required because db_patching 
-           # uses fixed and default values
-           replace_line patch_functions.sh "mysql -h localhost -P 3306 -u fgapiserver -pfgapiserver_password fgapiserver < \$SQLFILE" "    mysql -h $FGDB_HOST -P $FGDB_PORT -u $FGDB_USER -p$FGDB_PASSWD $FGDB_NAME < \$SQLFILE"
-           replace_line patch_functions.sh "mysql -h localhost -P 3306 -u fgapiserver -pfgapiserver_password fgapiserver -s -N -e \"\$SQLCMD\"" "mysql -h localhost -P 3306 -u fgapiserver -pfgapiserver_password fgapiserver -s -N -e \"\$SQLCMD\""
-           chmod +x patch_apply.sh
-           ./patch_apply.sh
-           RES=$?
-           if [ $RES -ne 0 ]; then
-               out "failed" 0 1
-               out "Error applying database patch"
-               exit 1
-           fi
-           out "Patch successfully applied"
-           cd - 2>/dev/null >/dev/null 
-       else
-           # Database does not exist; create it
-           out "APIServer database does not exists; creating  it... " 1
-           cd $FGDB_GITREPO
-           ASDB_OPTS="< fgapiserver_db.sql"
-           asdbr           
-           RES=$?
-           ASDB_OPTS="-sN"
-           if [ $RES -ne 0 ]; then
-               out "failed" 0 1
-               out "Error creating database"
-               exit 1
-           fi
-           out "done" 0 1
-           out "APIServer database successfully created"
-           cd - 2>/dev/null >/dev/null           
-       fi
-   fi
+out "Checkig APIServer database exists ... " 1
+ASDB_OPTS="-sN"
+CMD="ASDBCOUNT=\$(asdbr \"select count(*) from information_schema.schemata where schema_name = 'fgapiserver';\")"
+eval $CMD >$CMD_OUT 2>$CMD_ERR
+RES=$?
+done_or_report_fail "Did not check if APIServer database exists"
+    
+out "done" 0 1
+if [ $ASDBCOUNT -ne 0 ]; then
+  # Database exists; determine version and patch
+  out "APIServerDatabase exists; deterimne its version ... " 1
+  CMD="ASDBVER=\$(asdb \"select version from db_patches order by 1 desc limit 1;\")"
+  eval $CMD >$CMD_OUT 2>$CMD_ERR 
+  RES=$?
+  done_or_report_fail "Unable to determine FG database version" " ($ASDBVER)"
+  
+  # Database exists; it's time to update it
+  out "Attempting to patch APIServer database ... " 
+  cd $FGDB_GITREPO/db_patches
+  # Following are required because db_patching 
+  # uses fixed and default values in patch_functions.sh
+  sed -i "s/export ASDB_USER=fgapiserver/export ASDB_USER=$FGDB_USER/" patch_functions.sh 
+  sed -i "s/export ASDB_PASS=fgapiserver_password/export ASDB_PASS=$FGDB_PASSWD/" patch_functions.sh
+  sed -i "s/export ASDB_HOST=localhost/export ASDB_HOST=$FGDB_HOST/" patch_functions.sh
+  sed -i "s/export ASDB_PORT=3306/export ASDB_PORT=$FGDB_PORT/" patch_functions.sh
+  sed -i "s/export ASDB_NAME=fgapiserver/export ASDB_NAME=$FGDB_NAME/" patch_functions.sh
+  chmod +x patch_apply.sh
+  CMD="./patch_apply.sh"
+  eval $CMD >$CMD_OUT 2>$CMD_ERR 
+  RES=$?
+  done_or_report_fail "Error applying database patches"
+  out "Patch successfully applied"
+  cd - 2>/dev/null >/dev/null 
+else
+  # Database does not exist; create it
+  out "APIServer database does not exists; creating  it... " 1
+  cd $FGDB_GITREPO
+  configure_db_settings
+  ASDB_OPTS="< fgapiserver_db.sql"
+  CMD="asdbr > $CMD_OUT 2>$CMD_ERR"
+  eval $CMD >$CMD_OUT 2>$CMD_ERR          
+  RES=$?
+  done_or_report_fail "Error creating FG database"  
+  ASDB_OPTS="-sN"
+  out "done" 0 1
+  out "APIServer database successfully created"
+  cd - 2>/dev/null >/dev/null           
+fi
+
+# Exit upon failure
+[ $RES -ne 0 ] && exit 1   
+
+# Now take care of environment settings
+out "Setting up '"$FGDB_HOSTUNAME"' user profile ..."
    
-   # Now take care of environment settings
-   out "Setting up '"$FGDB_HOSTUNAME"' user profile ..."
-   
-   # Preparing user environment in .fgprofile/fgdb file
-   #   BGDB variables
-   #   DB macro functions
-   FGDBENVFILEPATH=.fgprofile/fgdb
-   cat >$FGDBENVFILEPATH <<EOF
+# Preparing user environment in .fgprofile/fgdb file
+#   BGDB variables
+#   DB macro functions
+FGDBENVFILEPATH=.fgprofile/fgdb
+cat >$FGDBENVFILEPATH <<EOF
 #!/bin/bash
 #
 # fgdb Environment setting configuration file
@@ -197,11 +215,10 @@ if [ $RES -eq 0 ]; then
 #
 # Author: Riccardo Bruno <riccardo.bruno@ct.infn.it>
 EOF
-   for vgdbvar in ${FGDB_VARS[@]}; do
-       echo "$vgdbvar=${!vgdbvar}" >> $FGDBENVFILEPATH
-   done
-   out "User profile successfully created"
-fi
+for vgdbvar in ${FGDB_VARS[@]}; do
+  echo "$vgdbvar=${!vgdbvar}" >> $FGDBENVFILEPATH
+done
+out "User profile successfully created"
 
 #
 # Global FG  profile

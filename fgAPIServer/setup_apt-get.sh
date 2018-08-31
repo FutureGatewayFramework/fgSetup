@@ -9,6 +9,8 @@ source .fgprofile/commons
 source .fgprofile/apt_commons
 source .fgprofile/config
 
+APACHE_CONFDIR_AVAILABLE=/etc/apache2/conf-available
+APACHE_CONFDIR_ENABLED=/etc/apache2/conf-enabled
 FGLOG=$HOME/fgAPIServer.log
 ASDB_OPTS="-sN"
 
@@ -40,13 +42,17 @@ STD_OUT=$(mktemp -t stdout.XXXXXX)
 STD_ERR=$(mktemp -t stderr.XXXXXX)
 TEMP_FILES+=( $STD_OUT )
 TEMP_FILES+=( $STD_ERR )
+CMD_OUT=$(mktemp -t stdout.XXXXXX)
+CMD_ERR=$(mktemp -t stderr.XXXXXX)
+TEMP_FILES+=( $CMD_OUT )
+TEMP_FILES+=( $CMD_ERR )
 
 out "Starting FutureGateway fgAPIServer apt-get versioned setup script"
 
 out "Verifying package manager and fgAPIServer user ..."
 
 # Check for brew and install it eventually
-check_and_setup_brew
+#@check_and_setup_brew
 
 # Check for FutureGateway fgAPIServer unix user
 check_and_create_user $FGAPISERVER_APPHOSTUNAME
@@ -56,6 +62,7 @@ out "Installing packages ..."
 
 # Mandatory packages installation
 APTPACKAGES=(
+  curl
   git
   wget
   coreutils
@@ -63,14 +70,27 @@ APTPACKAGES=(
   mysql-client
   python
   python-pip
+  python-dev
+  libmysqlclient-dev
   apache2
   apache2-utils
   libexpat1
   ssl-cert
   libapache2-mod-wsgi
-  virtualenv
 )
-install_apt ${APTPACKAGES[@]}
+install_apt ${APTPACKAGES[@]} >$CMD_OUT 2>$CMD_ERR
+RES=$?
+if [ $RES -ne 0 ]; then
+  out "failed" 0 1
+  out "Could not install required packages"
+  out "Command: install_apt ${APTPACKAGES[@]} >$CMD_OUT 2>$CMD_ERR"
+  out "Command output:"
+  cat $CMD_OUT
+  out "Command error:"
+  cat $CMD_ERR
+  exit 1
+fi
+out "done" 0 1
 
 # Check mysql client
 out "Looking up mysql client ... " 1
@@ -82,9 +102,9 @@ if [ "$MYSQL" = "" ]; then
 fi
 out "done ($MYSQL)" 0 1
         
-#Check connectivity with fgdb
+#Check connectivity with fgdb retrieving FGDB version
 out "Checking mysql connectivity with FutureGateway DB ... " 1
-ASDBVER=$(asdb "select version from db_patches order by 1 desc limit 1;")
+ASDBVER=$(asdb "select version from db_patches order by id desc limit 1;")
 RES=$?
 if [ $RES -ne 0 ]; then
     out "failed" 0 1
@@ -102,7 +122,7 @@ if [ $RES -ne 0 ]; then
     out "Service apache2 wont start"
     exit 1
 fi
-our "done" 0 1
+out "done" 0 1
 
 # Getting or updading software from Git
 git_clone_or_update "$GIT_BASE" "$FGAPISERVER_GITREPO" "$FGAPISERVER_GITTAG"
@@ -128,6 +148,7 @@ if [ $RES -eq 0 ]; then
    fi
    if [ $RES -eq 0 ]; then
       RES=1 &&
+      rm -rf .venv &&
       virtualenv .venv &&
       source ./.venv/bin/activate &&    
       pip install -r requirements.txt &&
@@ -152,13 +173,12 @@ if [ $RES -eq 0 ]; then
            out "ERROR: Apache2 seems not installed in your system, impossible to configure wsgi"
            exit 1
        fi
-       sudo su - -c "chmod o+w /etc/apache2/other"
-       sudo cat >/etc/apache2/other/fgapiserver.conf <<EOF
-LoadModule wsgi_module $MOD_WSGI
+       sudo su - -c "chmod o+w $APACHE_CONFDIR"
+       sudo cat >$APACHE_CONFDIR_AVAILABLE/fgapiserver.conf <<EOF
 <IfModule wsgi_module>
     <VirtualHost *:80>
         ServerName fgapiserver
-        WSGIDaemonProcess fgapiserver user=$FGAPISERVER_APPHOSTUNAME group=Admin processes=2 threads=5 home=$HOME/$FGAPISERVER_GITREPO python-path=$MYSQLPYPATH
+        WSGIDaemonProcess fgapiserver user=$FGAPISERVER_APPHOSTUNAME group=%{GLOBAL} processes=2 threads=5 home=$HOME/$FGAPISERVER_GITREPO python-path=$HOME/fgAPIServer python-home=$HOME/fgAPIServer/.venv
         WSGIProcessGroup fgapiserver
         WSGIScriptAlias /fgapiserver $HOME/$FGAPISERVER_GITREPO/fgapiserver.wsgi
         <Directory $HOME/$FGAPISERVER_GITREPO>
@@ -173,8 +193,9 @@ LoadModule wsgi_module $MOD_WSGI
     </VirtualHost>
 </IfModule>
 EOF
-        sudo su - -c "chmod o-w /etc/apache2/other"
-        sudo service apache2 restart
+        sudo ls -s $APACHE_CONFDIR_AVAILABLE/fgapiserver.conf $APACHE_CONFDIR_ENABLED/fgapiserver.conf
+        sudo su - -c "chmod o-w $APACHE_CONFDIR"
+        sudo service apache2 restart >/dev/null 2>/dev/null
    else
        out "Configuring fgAPIServer for stand-alone execution ..."
        cat >/etc/init.d/fgapiserver << EOF
@@ -234,7 +255,7 @@ EOF
        # Executing fgAPIServer service
        sudo service fgapiserver start
        # In case switching from wsgi to stand-alone
-       [ -f /etc/apache2/other/fgapiserver.conf ] && sudo service apache2 restart
+       [ -f $APACHE_CONFDIR/fgapiserver.conf ] && sudo service apache2 restart
    fi
    # Now take care of environment settings
    out "Setting up '"$FGAPISERVER_APPHOSTUNAME"' user profile ..."
@@ -265,23 +286,35 @@ EOF
    # Now configure fgAPIServer accordingly to configuration settings
    out "Configuring fgAPIServer ... " 1
    cd $HOME/$FGAPISERVER_GITREPO
-   replace_line fgapiserver.conf "fgapisrv_host" "fgapisrv_host = \"$FGAPISERVER_APPHOST\""
-   replace_line fgapiserver.conf "fgapisrv_debug" "fgapisrv_debug = \"$FGAPISERVER_DEBUG\""
-   replace_line fgapiserver.conf "fgapisrv_port" "fgapisrv_port = \"$FGAPISERVER_PORT\""
-   replace_line fgapiserver.conf "fgapisrv_iosandbox" "fgapisrv_iosandbox = \"$FGAPISERVER_IOPATH\""
-   replace_line fgapiserver.conf "fgapisrv_db_port" "fgapisrv_db_port = \"$FGDB_PORT\""
-   replace_line fgapiserver.conf "fgapisrv_db_pass" "fgapisrv_db_pass = \"$FGDB_PASSWD\""
-   replace_line fgapiserver.conf "fgapisrv_db_host" "fgapisrv_db_host = \"$FGDB_HOST\""
-   replace_line fgapiserver.conf "fgapisrv_db_name" "fgapisrv_db_name = \"$FGDB_HOST\""
-   replace_line fgapiserver.conf "fgapisrv_dbver" "fgapisrv_dbver = \"$ASDBVER\""
-   replace_line fgapiserver.conf "fgapisrv_geappid" "fgapisrv_geappid = \"$UTDB_FGAPPID\""
-   replace_line fgapiserver.conf "fgapiver" "fgapiver = \"$FGAPISERVER_APIVER\""
-   replace_line fgapiserver.conf "fgapisrv_notoken" "fgapisrv_notoken = \"$FGAPISERVER_NOTOKEN\""
-   replace_line fgapiserver.conf "fgapisrv_lnkptvflag" "fgapisrv_lnkptvflag = \"$FGAPISERVER_PTVFLAG\""
-   replace_line fgapiserver.conf "fgapisrv_ptvendpoint" "fgapisrv_ptvendpoint = \"$FGAPISERVER_PTVENDPOINT\""
-   replace_line fgapiserver.conf "fgapisrv_ptvmapfile" "fgapisrv_ptvmapfile = \"$FGAPISERVER_PTVMAPFILE\""
-   replace_line fgapiserver.conf "fgapisrv_ptvuser" "fgapisrv_ptvuser = \"$FGAPISERVER_PTVUSER\""
-   replace_line fgapiserver.conf "fgapisrv_ptvpass" "fgapisrv_ptvpass = \"$FGAPISERVER_PTVPASS\""
+   get_ts
+   cp fgapiserver.conf fgapiserver.conf_$TS
+   sed -i "s/^fgapiver.*/fgapiver = $FGAPISERVER_APIVER/" fgapiserver.conf &&\
+   sed -i "s/^fgapiserver_name.*/fgapiserver_name = $FGAPISERVER_NAME/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_host.*/fgapisrv_host = $FGAPISERVER_APPHOST/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_port.*/fgapisrv_port = $FGAPISERVER_PORT/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_debug.*/fgapisrv_debug = $FGAPISERVER_DEBUG/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_iosandbox.*/fgapisrv_iosandbox = $FGAPISERVER_IOPATH/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_geappid.*/fgapisrv_geappid = $UTDB_FGAPPID/" fgapiserver.conf &&\
+   sed -i "s/^fgjson_indent.*/fgjson_indent = $FGAPISERVER_JSONINDENT/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_key.*/fgapisrv_key = $FGAPISERVER_KEY/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_crt.*/fgapisrv_crt = $FGAPISERVER_CRT/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_logcfg.*/fgapisrv_logcfg = $FGAPISERVER_LOGCFG/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_dbver.*/fgapisrv_dbver = $ASDBVER/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_secret.*/fgapisrv_secret = $FGAPISRV_SECRET/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_notoken\ .*/fgapisrv_notoken = $FGAPISRV_NOTOKEN/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_notokenusr.*/fgapisrv_notokenusr = $FGAPISERVER_NOTOKEN/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_lnkptvflag.*/fgapisrv_lnkptvflag = $FGAPISERVER_PTVFLAG/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_ptvendpoint.*/fgapisrv_ptvendpoint = $FGAPISERVER_PTVENDPOINT/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_ptvuser.*/fgapisrv_ptvuser = $FGAPISERVER_PTVUSER/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_ptvpass.*/fgapisrv_ptvpass = $FGAPISERVER_PTVPASS/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_ptvdefusr.*/fgapisrv_ptvdefusr = $FGAPISERVER_PTVUSER/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_ptvdefgrp.*/fgapisrv_ptvdefgrp = $FGAPISRV_PTVDEFGRP/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_ptvmapfile.*/fgapisrv_ptvmapfile = $FGAPISERVER_PTVMAPFILE/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_db_host.*/fgapisrv_db_host = $FGDB_HOST/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_db_port.*/fgapisrv_db_port = $FGDB_PORT/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_db_user.*/fgapisrv_db_user = $FGDB_USER/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_db_pass.*/fgapisrv_db_pass = $FGDB_PASSWD/" fgapiserver.conf &&\
+   sed -i "s/^fgapisrv_db_name.*/fgapisrv_db_name = $FGDB_NAME/" fgapiserver.conf &&\
    cd - 2>/dev/null >/dev/null
    out "done" 0 1
 fi

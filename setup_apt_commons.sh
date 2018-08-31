@@ -15,7 +15,10 @@ install_apt() {
     exit 1
   fi
   out "APT is on: '"$APT_GET"'"
-  out "Installing packages ..."
+  out "Installing packages:"
+  for pkg in $APTPACKAGES; do
+    out "    $pkg"
+  done
 
   sudo $APT_GET update &&\
   sudo $APT_GET install -y $APTPACKAGES
