@@ -21,6 +21,10 @@ GIT_REPO=FutureGatewayFramework               # FutureGateway repositoty name
 GIT_BASE=$GIT_HOST/$GIT_REPO                  # GitHub base repository endpoint
 GIT_BASERAW=$GIT_RAWHOST/$GIT_REPO            # GitHub base for raw content
 
+# FutureGateway generic values
+FG_USER=futuregateway
+FG_DIR=/home/futuregateway
+
 # Components setup configurations
 
 # APIServerDB
@@ -39,7 +43,7 @@ FGDB_VARS="FGDB_HOST\
            FGDB_GITREPO\
            FGDB_GITTAG"
 FGDB_HOST=127.0.0.1                  # Database server address
-FGDB_HOSTUNAME=futuregateway         # Database host username
+FGDB_HOSTUNAME=$FG_USER              # Database host username
 FGDB_PORT=3306                       # Database port number
 FGDB_NAME=fgapiserver                # Database name
 FGDB_ROOTPWD=                        # Leave it empty for no password
@@ -49,8 +53,7 @@ FGDB_SSHPORT=22                      # Database ssh port number
 FGDB_GITREPO=fgAPIServer             # Database Git repository name
 FGDB_GITTAG="EnvConfig"              # Database Git repository tag/branch name
 
-
-# API front-end
+# API server front-end
 #
 # FutureGateway may have different kind of API front-ends.
 # The principal aim of front-ends is to listen and accept incoming rest calls
@@ -62,6 +65,7 @@ FGDB_GITTAG="EnvConfig"              # Database Git repository tag/branch name
 # This component requires the following variables
 FGAPISERVER_VARS="FGAPISERVER_SETUP\
                   FGAPISERVER_NAME\
+                  FGAPISERVER_HOST\
                   FGAPISERVER_APPHOST\
                   FGAPISERVER_APPHOSTUNAME\
                   FGAPISERVER_PORT\

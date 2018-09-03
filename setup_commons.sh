@@ -550,3 +550,30 @@ git_clone_or_update() {
     
     return 0
 }
+
+
+# Execute the command specified in $CMD variable and report execution status
+# In case of error, output and error streams are reported together with a given
+# error message
+#
+# Used values as input/output:
+#   $CMD - The command to execute
+#   $RES - Return code of the executed command 
+#   $1   - Error message to report in case of failure
+#   $CMD_OUT, $CMD_ER created during installation startup, they must exist
+exec_cmd() {
+  eval $CMD >$CMD_OUT 2>$CMD_ERR
+  RES=$?
+  if [ $RES -ne 0 ]; then
+    out "failed" 0 1
+    out "ERROR: \"$1\""
+    out "Command: \"$CMD\""
+    out "Output:"
+    out "$(cat $CMD_OUT)"
+    out "Error:"
+    out "$(cat $CMD_ERR)"
+    exit 1
+ else
+    out "done$2" 0 1
+ fi
+}

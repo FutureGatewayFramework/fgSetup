@@ -39,6 +39,10 @@ STD_OUT=$(mktemp -t stdout.XXXXXX)
 STD_ERR=$(mktemp -t stderr.XXXXXX)
 TEMP_FILES+=( $STD_OUT )
 TEMP_FILES+=( $STD_ERR )
+CMD_OUT=$(mktemp -t stdout.XXXXXX)
+CMD_ERR=$(mktemp -t stderr.XXXXXX)
+TEMP_FILES+=( $CMD_OUT )
+TEMP_FILES+=( $CMD_ERR )
 
 out "Starting FutureGateway database brew versioned setup script"
 
@@ -74,38 +78,26 @@ done
 if [ $RES -eq 0 ]; then
     out "Starting mysql service ... " 1
     # Using restart since mysql could be already running
-    sudo $BREW services restart mysql 2>$STD_ERR >$STD_OUT
-    RES=$?
-    if [ $RES -ne 0 ]; then
-        out "failed" 0 1
-        out "Output:"
-        out "$(cat $STD_ERR)"
-        out "Error:"
-        out "$(cat $STD_ERR)"
-    else
-        out "done" 0 1    
-    fi
-    
+    CMD="sudo \$BREW services restart mysql" 
+    exec_cmd "Unable to start mysql service"
+
     # Check mysql client
     out "Looking up mysql client ... " 1
-    MYSQL=$(which mysql)
-    if [ "$MYSQL" = "" ]; then
-      out "failed" 0 1
-      out "Did not find mysql command"
-      exit 1
-    fi
+    CMD="MYSQL=\$(which mysql)"
+    exec_cmd "Did not find mysql command"
     out "done ($MYSQL)" 0 1
-        
+
+    # Check mysql client
+    out "Looking up mysql version ... " 1
+    CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
+    exec_cmd "Did not retrieve mysql version"
+    out "done ($MYSQLVER)" 0 1
+
     #Check connectivity
     out "Checking mysql connectivity ... " 1
-    $MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ "$FGDB_ROOTPWD" != "" ] && echo "-p$FGDB_ROOTPWD") -e "select version()" >/dev/null 2>/dev/null
-    RES=$?
-    if [ $RES -ne 0 ]; then
-        out "failed" 0 1
-        out "Missing mysql connectivity"
-        exit 1
-    fi
-    out "done" 0 1    
+    CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
+    exec_cmd "Missing mysql connectivity"
+    out "done" 0 1
 fi
 
 # Getting or updading software from Git (database in fgAPIServer repo)
@@ -176,9 +168,22 @@ if [ $RES -eq 0 ]; then
            cd - 2>/dev/null >/dev/null 
        else
            # Database does not exist; create it
-           out "APIServer database does not exists; creating  it... " 1
+           out "APIServer database does not exists; creating  it ... " 1
+
            cd $FGDB_GITREPO
            ASDB_OPTS="< fgapiserver_db.sql"
+           CMD="asdbr > $CMD_OUT 2>$CMD_ERR"
+           eval $CMD >$CMD_OUT 2>$CMD_ERR
+           RES=$?
+           done_or_report_fail "Error creating FG database"
+           out "Creating APIServer database user ... " 1
+           if [ $MYSQLVER -lt 80 ]; then
+             out "(dbusr5)" 1 1
+             ASDB_OPTS="< fgapiserver_dbusr5.sql"
+           else
+             out "(dbusr8)" 1 1
+             ASDB_OPTS="< fgapiserver_dbusr8.sql"
+           fi
            asdbr           
            RES=$?
            ASDB_OPTS="-sN"

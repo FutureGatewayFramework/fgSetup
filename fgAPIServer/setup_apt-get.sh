@@ -92,15 +92,15 @@ if [ $RES -ne 0 ]; then
 fi
 out "done" 0 1
 
-# Check mysql client
+# Check mysql client version
 out "Looking up mysql client ... " 1
-MYSQL=$(which mysql)
-if [ "$MYSQL" = "" ]; then
+MYSQLVER=$(mysql -V | awk '{ print $5 }' | awk -F "." '{ printf ("%s.%s",$1,$2) }')
+if [ "$MYSQLVER" = "" ]; then
     out "failed" 0 1
-    out "Did not find mysql command"
+    out "Did not find mysql client"
     exit 1
 fi
-out "done ($MYSQL)" 0 1
+out "done ($MYSQLVER)" 0 1
         
 #Check connectivity with fgdb retrieving FGDB version
 out "Checking mysql connectivity with FutureGateway DB ... " 1

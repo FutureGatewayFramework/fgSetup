@@ -27,22 +27,6 @@ cleanup_tempFiles() {
   done
 }
 
-# Report CMD failure
-done_or_report_fail() {
-  if [ $RES -ne 0 ]; then
-    out "failed" 0 1
-    out "ERROR: \"$1\"" 
-    out "Command: \"$CMD\""
-    out "Output:"
-    out "$(cat $CMD_OUT)"
-    out "Error:"
-    out "$(cat $CMD_ERR)"
-    exit 1
- else
-    out "done$2" 0 1  
- fi
-}
-
 # DB settings configuration
 configure_db_settings() {
     RES=1
@@ -108,30 +92,30 @@ if [ $RES -eq 0 ]; then
     out "Starting mysql service ... " 1
     # Using restart since mysql could be already running
     CMD="sudo service mysql start 2>$CMD_ERR >$CMD_OUT"
-    eval $CMD >$CMD_OUT 2>$CMD_ERR
-    RES=$?
-    done_or_report_fail "Unable to start mysql service"
+    exec_cmd "Unable to start mysql service"
     
     # Check mysql client
     out "Looking up mysql client ... " 1
     CMD="MYSQL=\$(which mysql)"
-    eval $CMD >$CMD_OUT 2>$CMD_ERR 
-    done_or_report_fail "Did not find mysql command"
+    exec_cmd "Did not find mysql command"
     out "done ($MYSQL)" 0 1
-        
+
+    # Check mysql client
+    out "Looking up mysql version ... " 1
+    CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
+    exec_cmd "Did not retrieve mysql version"
+    out "done ($MYSQLVER)" 0 1    
+    
     #Check connectivity
     out "Checking mysql connectivity ... " 1
     CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
-    eval $CMD >$CMD_OUT 2>$CMD_ERR 
-    done_or_report_fail "Missing mysql connectivity"
+    exec_cmd "Missing mysql connectivity"
     out "done" 0 1    
 fi
 
 # Getting or updading software from Git (database in fgAPIServer repo)
 CMD="git_clone_or_update \"$GIT_BASE\" \"$FGAPISERVER_GITREPO\" \"$FGAPISERVER_GITTAG\""
-eval $CMD >$CMD_OUT 2>$CMD_ERR
-RES=$?
-done_or_report_fail "Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
+exec_cmd "Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
 
 # Environment setup
 
@@ -150,24 +134,22 @@ done_or_report_fail "Macro function test check failed; at lease one of the manda
 out "Checkig APIServer database exists ... " 1
 ASDB_OPTS="-sN"
 CMD="ASDBCOUNT=\$(asdbr \"select count(*) from information_schema.schemata where schema_name = 'fgapiserver';\")"
-eval $CMD >$CMD_OUT 2>$CMD_ERR
-RES=$?
-done_or_report_fail "Did not check if APIServer database exists"
+exec_cmd "Did not check if APIServer database exists"
     
 out "done" 0 1
 if [ $ASDBCOUNT -ne 0 ]; then
   # Database exists; determine version and patch
   out "APIServerDatabase exists; deterimne its version ... " 1
   CMD="ASDBVER=\$(asdb \"select version from db_patches order by 1 desc limit 1;\")"
-  eval $CMD >$CMD_OUT 2>$CMD_ERR 
-  RES=$?
-  done_or_report_fail "Unable to determine FG database version" " ($ASDBVER)"
+  exec_cmd "Unable to determine FG database version" " ($ASDBVER)"
   
   # Database exists; it's time to update it
   out "Attempting to patch APIServer database ... " 
   cd $FGDB_GITREPO/db_patches
   # Following are required because db_patching 
   # uses fixed and default values in patch_functions.sh
+  get_ts
+  cp patch_functions.sh patch_functions.sh_$TS
   sed -i "s/export ASDB_USER=fgapiserver/export ASDB_USER=$FGDB_USER/" patch_functions.sh 
   sed -i "s/export ASDB_PASS=fgapiserver_password/export ASDB_PASS=$FGDB_PASSWD/" patch_functions.sh
   sed -i "s/export ASDB_HOST=localhost/export ASDB_HOST=$FGDB_HOST/" patch_functions.sh
@@ -175,21 +157,27 @@ if [ $ASDBCOUNT -ne 0 ]; then
   sed -i "s/export ASDB_NAME=fgapiserver/export ASDB_NAME=$FGDB_NAME/" patch_functions.sh
   chmod +x patch_apply.sh
   CMD="./patch_apply.sh"
-  eval $CMD >$CMD_OUT 2>$CMD_ERR 
-  RES=$?
-  done_or_report_fail "Error applying database patches"
+  exec_cmd "Error applying database patches"
   out "Patch successfully applied"
   cd - 2>/dev/null >/dev/null 
 else
   # Database does not exist; create it
-  out "APIServer database does not exists; creating  it... " 1
+  out "APIServer database does not exists; creating  it ... " 1
   cd $FGDB_GITREPO
   configure_db_settings
   ASDB_OPTS="< fgapiserver_db.sql"
   CMD="asdbr > $CMD_OUT 2>$CMD_ERR"
-  eval $CMD >$CMD_OUT 2>$CMD_ERR          
-  RES=$?
-  done_or_report_fail "Error creating FG database"  
+  exec_cmd "Error creating FG database"
+  out "Creating APIServer database user ... " 1
+  if [ $MYSQLVER -lt 80 ]; then
+    out "(dbusr5)" 1 1
+    ASDB_OPTS="< fgapiserver_dbusr5.sql"
+  else
+    out "(dbusr8)" 1 1
+    ASDB_OPTS="< fgapiserver_dbusr8.sql"
+  fi
+  CMD="asdbr > $CMD_OUT 2>$CMD_ERR"
+  exec_cmd "Error creating FG database user"  
   ASDB_OPTS="-sN"
   out "done" 0 1
   out "APIServer database successfully created"
