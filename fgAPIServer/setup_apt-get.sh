@@ -173,12 +173,12 @@ if [ $RES -eq 0 ]; then
            out "ERROR: Apache2 seems not installed in your system, impossible to configure wsgi"
            exit 1
        fi
-       sudo su - -c "chmod o+w $APACHE_CONFDIR"
+       sudo su - -c "chmod o+w $APACHE_CONFDIR_AVAILABLE && chmod o+w $APACHE_CONFDIR_ENABLED"
        sudo cat >$APACHE_CONFDIR_AVAILABLE/fgapiserver.conf <<EOF
 <IfModule wsgi_module>
     <VirtualHost *:80>
         ServerName fgapiserver
-        WSGIDaemonProcess fgapiserver user=$FGAPISERVER_APPHOSTUNAME group=%{GLOBAL} processes=2 threads=5 home=$HOME/$FGAPISERVER_GITREPO python-path=$HOME/fgAPIServer python-home=$HOME/fgAPIServer/.venv
+        WSGIDaemonProcess fgapiserver user=$FGAPISERVER_APPHOSTUNAME processes=2 threads=5 home=$HOME/$FGAPISERVER_GITREPO python-path=$HOME/fgAPIServer python-home=$HOME/fgAPIServer/.venv
         WSGIProcessGroup fgapiserver
         WSGIScriptAlias /fgapiserver $HOME/$FGAPISERVER_GITREPO/fgapiserver.wsgi
         <Directory $HOME/$FGAPISERVER_GITREPO>
@@ -193,8 +193,8 @@ if [ $RES -eq 0 ]; then
     </VirtualHost>
 </IfModule>
 EOF
-        sudo ls -s $APACHE_CONFDIR_AVAILABLE/fgapiserver.conf $APACHE_CONFDIR_ENABLED/fgapiserver.conf
-        sudo su - -c "chmod o-w $APACHE_CONFDIR"
+        sudo ln -s $APACHE_CONFDIR_AVAILABLE/fgapiserver.conf $APACHE_CONFDIR_ENABLED/fgapiserver.conf
+        sudo su - -c "chmod o-w $APACHE_CONFDIR_AVAILABLE && chmod o-w $APACHE_CONFDIR_ENABLED"
         sudo service apache2 restart >/dev/null 2>/dev/null
    else
        out "Configuring fgAPIServer for stand-alone execution ..."
@@ -255,7 +255,7 @@ EOF
        # Executing fgAPIServer service
        sudo service fgapiserver start
        # In case switching from wsgi to stand-alone
-       [ -f $APACHE_CONFDIR/fgapiserver.conf ] && sudo service apache2 restart
+       [ -l $APACHE_CONFDIR_ENABLED/fgapiserver.conf ] && sudo service apache2 restart
    fi
    # Now take care of environment settings
    out "Setting up '"$FGAPISERVER_APPHOSTUNAME"' user profile ..."
@@ -327,3 +327,4 @@ else
 fi
 out "$OUTMODE finished FutureGateway fgAPIServer apt-get versioned setup script"
 exit $RES
+

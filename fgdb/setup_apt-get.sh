@@ -125,11 +125,11 @@ if [ $ASDBCOUNT -ne 0 ]; then
   
   # Database exists; it's time to update it
   out "Attempting to patch APIServer database ... " 
-  cd $FGDB_GITREPO/db_patches
+  cd - 2>/dev/null >/dev/null
+  cd $FGDB_GITREPO/db_patches 2>/dev/null >/dev/null
   CMD="chmod +x patch_apply.sh && ./patch_apply.sh"
   exec_cmd "Error applying database patches"
   out "Patch successfully applied"
-  cd - 2>/dev/null >/dev/null 
 else
   # Database does not exist; create it
   out "APIServer database does not exists; creating  it ... " 1

@@ -586,20 +586,25 @@ exec_cmd() {
 configure_db_settings() {
     RES=1
 
+    # Save old files
     get_ts &&\
     cp fgapiserver_db.sql fgapiserver_db.sql_$TS &&\
+    cp fgapiserver_dbusr5.sql fgapiserver_dbusr5.sql_$TS &&\
+    cp fgapiserver_dbusr8.sql fgapiserver_dbusr8.sql_$TS &&\
 
     # Change db settings for both mysql5, mysql8
 
     # mysql5
-    sed -i "s/fgapiserver.*/$FGDB_NAME/g" fgapiserver_dbusr5.sql &&\
+    sed -i "s/grant all on fgapiserver/grant all on $FGDB_NAME/g" fgapiserver_dbusr5.sql &&\
     sed -i "s/fgapiserver\'@/$FGDB_USER\'@/g" fgapiserver_dbusr5.sql &&\
     sed -i "s/identified\ by\ \"fgapiserver_password\"/identified\ by\ \"$FGDB_PASSWD\"/g" fgapiserver_dbusr5.sql &&\
 
     # mysql8
-    sed -i "s/fgapiserver.*/$FGDB_NAME/g" fgapiserver_dbusr5.sql &&\
-    sed -i "s/fgapiserver\'@/$FGDB_USER\'@/g" fgapiserver_dbusr5.sql &&\
-    sed -i "s/identified\ by\ \"fgapiserver_password\"/identified\ by\ \"$FGDB_PASSWD\"/g" fgapiserver_dbusr5.sql &&\
+    sed -i "s/create user 'fgapiserver/create user '$FGDB_USER/g" fgapiserver_dbusr8.sql &&\
+    sed -i "s/alter user 'fgapiserver/alter user '$FGDB_USER/g" fgapiserver_dbusr8.sql &&\
+    sed -i "s/on fgapiserver/on $FGDB_NAME/g" fgapiserver_dbusr8.sql &&\
+    sed -i "s/to \'fgapiserver\'@/\'$FGDB_USER\'@/g" fgapiserver_dbusr8.sql &&\
+    sed -i "s/identified\ by\ \"fgapiserver_password\"/identified\ by\ \"$FGDB_PASSWD\"/g" fgapiserver_dbusr8.sql &&\
 
     # db_patches/patch_functions.sh
     sed -i "s/export ASDB_USER=fgapiserver/export ASDB_USER=$FGDB_USER/" db_patches/patch_functions.sh &&\
@@ -613,4 +618,5 @@ configure_db_settings() {
 
     return $RES
 }
+
 
