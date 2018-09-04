@@ -607,6 +607,9 @@ configure_db_settings() {
     sed -i "s/export ASDB_HOST=localhost/export ASDB_HOST=$FGDB_HOST/" db_patches/patch_functions.sh &&\
     sed -i "s/export ASDB_PORT=3306/export ASDB_PORT=$FGDB_PORT/" db_patches/patch_functions.sh &&\
     sed -i "s/export ASDB_NAME=fgapiserver/export ASDB_NAME=$FGDB_NAME/" db_patches/patch_functions.sh &&\
+    
+    # Set successful operation
+    RES=0
 
     return $RES
 }
