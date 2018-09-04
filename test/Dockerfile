@@ -16,6 +16,7 @@ ENV TEST_USER=fgtest\
 # Package Installation and TeSS cloning
 RUN  adduser --home $TEST_DIR --disabled-password --gecos "" $TEST_USER &&\
      adduser --home $FG_DIR --disabled-password --gecos "" $FG_USER &&\
+     export DEBIAN_FRONTEND=noninteractive &&\
      apt-get update &&\
      apt-get install -y --no-install-recommends\
              sudo\
@@ -32,8 +33,7 @@ RUN  adduser --home $TEST_DIR --disabled-password --gecos "" $TEST_USER &&\
     echo "$TEST_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers &&\
     echo "$FG_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers &&\
     apt-get clean &&\
-    rm -rf /var/lib/apt/lists/* &&\
-    find /home
+    rm -rf /var/lib/apt/lists/*
 
 # FGUser
 USER $FG_USER

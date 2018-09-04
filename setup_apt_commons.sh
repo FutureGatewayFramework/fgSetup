@@ -8,6 +8,7 @@
 # Install package list using apt-get
 install_apt() {
   APTPACKAGES=$@
+  export DEBIAN_FRONTEND=noninteractive
 
   APT_GET=$(which apt-get)
   if [ "$APT_GET" = "" ]; then
