@@ -577,3 +577,37 @@ exec_cmd() {
     out "done$2" 0 1
  fi
 }
+
+# Configure database settings in fgAPIServer directory
+# The operation involves files:
+#    fgapiserver_dbusr5.sql
+#    fgapiserver_dbusr8.sql
+#    db_patches/patch_functions.sh
+configure_db_settings() {
+    RES=1
+
+    get_ts &&\
+    cp fgapiserver_db.sql fgapiserver_db.sql_$TS &&\
+
+    # Change db settings for both mysql5, mysql8
+
+    # mysql5
+    sed -i "s/fgapiserver.*/$FGDB_NAME/g" fgapiserver_dbusr5.sql &&\
+    sed -i "s/fgapiserver\'@/$FGDB_USER\'@/g" fgapiserver_dbusr5.sql &&\
+    sed -i "s/identified\ by\ \"fgapiserver_password\"/identified\ by\ \"$FGDB_PASSWD\"/g" fgapiserver_dbusr5.sql &&\
+
+    # mysql8
+    sed -i "s/fgapiserver.*/$FGDB_NAME/g" fgapiserver_dbusr5.sql &&\
+    sed -i "s/fgapiserver\'@/$FGDB_USER\'@/g" fgapiserver_dbusr5.sql &&\
+    sed -i "s/identified\ by\ \"fgapiserver_password\"/identified\ by\ \"$FGDB_PASSWD\"/g" fgapiserver_dbusr5.sql &&\
+
+    # db_patches/patch_functions.sh
+    sed -i "s/export ASDB_USER=fgapiserver/export ASDB_USER=$FGDB_USER/" patch_functions.sh &&\
+    sed -i "s/export ASDB_PASS=fgapiserver_password/export ASDB_PASS=$FGDB_PASSWD/" patch_functions.sh &&\
+    sed -i "s/export ASDB_HOST=localhost/export ASDB_HOST=$FGDB_HOST/" patch_functions.sh &&\
+    sed -i "s/export ASDB_PORT=3306/export ASDB_PORT=$FGDB_PORT/" patch_functions.sh &&\
+    sed -i "s/export ASDB_NAME=fgapiserver/export ASDB_NAME=$FGDB_NAME/" patch_functions.sh &&\
+
+    return $RES
+}
+

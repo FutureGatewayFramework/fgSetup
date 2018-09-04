@@ -27,30 +27,6 @@ cleanup_tempFiles() {
   done
 }
 
-# DB settings configuration
-configure_db_settings() {
-    RES=1
-
-    get_ts
-    cp fgapiserver_db.sql fgapiserver_db.sql_$TS
-
-    sed -i "s/drop\ database\ if\ exists\ fgapiserver;/drop\ database\ if\ exists\ $FGDB_NAME;/"  fgapiserver_db.sql &&\
-    sed -i "s/create\ database\ fgapiserver;/create\ database\ $FGDB_NAME;/" fgapiserver_db.sql &&\
-# FG user@%
-    sed -i "s/create\ user\ 'fgapiserver'\@'%'/create\ user\ '$FGDB_USER'\@'%'/" fgapiserver_db.sql &&\
-    sed -i "s/alter\ user\ 'fgapiserver'\@'%'\ identified\ by\ \"fgapiserver_password\";/alter\ user\ 'fgapiserver'\@'%'\ identified\ by\ \"$FGDB_PASSWD\";/" fgapiserver_db.sql &&\
-    sed -i "s/on\ fgapiserver.\*/on\ $FGDB_NAME.\*/" fgapiserver_db.sql &&\
-    sed -i "s/to\ 'fgapiserver'\@'%'/to\ '$FGDB_USER'\@'%'/" fgapiserver_db.sql &&\
-# FG user@localhost
-    sed -i "s/create\ user\ 'fgapiserver'\@'localhost'/create\ user\ '$FGDB_USER'\@'localhost'/" fgapiserver_db.sql &&\
-    sed -i "s/alter\ user\ 'fgapiserver'\@'localhost'\ identified\ by\ \"fgapiserver_password\";/alter\ user\ 'fgapiserver'\@'localhost'\ identified\ by\ \"$FGDB_PASSWD\";/" fgapiserver_db.sql &&\
-    sed -i "s/on\ fgapiserver.\*/on\ $FGDB_NAME.\*/" fgapiserver_db.sql &&\
-    sed -i "s/to\ 'fgapiserver'\@'localhost'/to\ '$FGDB_USER'\@'localhost'/" fgapiserver_db.sql &&\
-    RES=0
-
-    return $RES
-}
-
 #
 # Script body
 #
@@ -129,14 +105,18 @@ out "  asdb ... " 1
 declare -F asdb &>/dev/null && out "found" 0 1 || (echo "asdb not found" 0 1; RES=1)
 out "  dbcn ... " 1
 declare -F dbcn &>/dev/null && out "found" 0 1 || (echo "dbcn not found" 0 1; RES=1)
-done_or_report_fail "Macro function test check failed; at lease one of the mandatory functions is missing"
+CMD="[ $RES -eq 0 ]" 
+exec_cmd "Macro function test check failed; at lease one of the mandatory functions is missing"
 
 out "Checkig APIServer database exists ... " 1
 ASDB_OPTS="-sN"
 CMD="ASDBCOUNT=\$(asdbr \"select count(*) from information_schema.schemata where schema_name = 'fgapiserver';\")"
 exec_cmd "Did not check if APIServer database exists"
-    
-out "done" 0 1
+
+cd $FGDB_GITREPO
+out "Configure DB settings ... " 1
+CMD="configure_db_settings"
+exec_cmd "Unable to confiugre database settings"
 if [ $ASDBCOUNT -ne 0 ]; then
   # Database exists; determine version and patch
   out "APIServerDatabase exists; deterimne its version ... " 1
@@ -146,25 +126,14 @@ if [ $ASDBCOUNT -ne 0 ]; then
   # Database exists; it's time to update it
   out "Attempting to patch APIServer database ... " 
   cd $FGDB_GITREPO/db_patches
-  # Following are required because db_patching 
-  # uses fixed and default values in patch_functions.sh
-  get_ts
-  cp patch_functions.sh patch_functions.sh_$TS
-  sed -i "s/export ASDB_USER=fgapiserver/export ASDB_USER=$FGDB_USER/" patch_functions.sh 
-  sed -i "s/export ASDB_PASS=fgapiserver_password/export ASDB_PASS=$FGDB_PASSWD/" patch_functions.sh
-  sed -i "s/export ASDB_HOST=localhost/export ASDB_HOST=$FGDB_HOST/" patch_functions.sh
-  sed -i "s/export ASDB_PORT=3306/export ASDB_PORT=$FGDB_PORT/" patch_functions.sh
-  sed -i "s/export ASDB_NAME=fgapiserver/export ASDB_NAME=$FGDB_NAME/" patch_functions.sh
-  chmod +x patch_apply.sh
-  CMD="./patch_apply.sh"
+  CMD="chmod +x patch_apply.sh && ./patch_apply.sh"
   exec_cmd "Error applying database patches"
   out "Patch successfully applied"
   cd - 2>/dev/null >/dev/null 
 else
   # Database does not exist; create it
   out "APIServer database does not exists; creating  it ... " 1
-  cd $FGDB_GITREPO
-  configure_db_settings
+  
   ASDB_OPTS="< fgapiserver_db.sql"
   CMD="asdbr > $CMD_OUT 2>$CMD_ERR"
   exec_cmd "Error creating FG database"
@@ -176,13 +145,13 @@ else
     out "(dbusr8)" 1 1
     ASDB_OPTS="< fgapiserver_dbusr8.sql"
   fi
-  CMD="asdbr > $CMD_OUT 2>$CMD_ERR"
+  CMD="asdbr"
   exec_cmd "Error creating FG database user"  
   ASDB_OPTS="-sN"
   out "done" 0 1
   out "APIServer database successfully created"
-  cd - 2>/dev/null >/dev/null           
 fi
+cd - 2>/dev/null >/dev/null
 
 # Exit upon failure
 [ $RES -ne 0 ] && exit 1   
