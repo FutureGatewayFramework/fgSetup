@@ -178,6 +178,7 @@ if [ $RES -eq 0 ]; then
 <IfModule wsgi_module>
     <VirtualHost *:80>
         ServerName fgapiserver
+        WSGIPassAuthorization On
         WSGIDaemonProcess fgapiserver user=$FGAPISERVER_APPHOSTUNAME processes=2 threads=5 home=$HOME/$FGAPISERVER_GITREPO python-path=$HOME/fgAPIServer python-home=$HOME/fgAPIServer/.venv
         WSGIProcessGroup fgapiserver
         WSGIScriptAlias /fgapiserver $HOME/$FGAPISERVER_GITREPO/fgapiserver.wsgi

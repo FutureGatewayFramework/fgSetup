@@ -12,7 +12,6 @@ ENV TEST_USER=fgtest\
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup\
     FGSETUP_BRANCH=master
 
-
 # Package Installation and TeSS cloning
 RUN  adduser --home $TEST_DIR --disabled-password --gecos "" $TEST_USER &&\
      adduser --home $FG_DIR --disabled-password --gecos "" $FG_USER &&\
@@ -20,6 +19,7 @@ RUN  adduser --home $TEST_DIR --disabled-password --gecos "" $TEST_USER &&\
      apt-get update &&\
      apt-get install -y --no-install-recommends\
              sudo\
+             screen\
              git\
              ca-certificates\
              software-properties-common\
@@ -44,6 +44,9 @@ RUN ssh-keygen -t rsa -N '' -f $FG_DIR/.ssh/id_rsa &&\
 # User and working directory
 USER $TEST_USER
 WORKDIR $TEST_DIR
+
+# Add do_tests.sh script
+ADD do_tests.sh do_tests.sh
 
 # Getting FG repo
 RUN echo "StrictHostKeyChecking no\nUserKnownHostsFile=/dev/null\n" > ssh_opt &&\

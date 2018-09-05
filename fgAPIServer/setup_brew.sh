@@ -168,6 +168,7 @@ LoadModule wsgi_module $MOD_WSGI
 <IfModule wsgi_module>
     <VirtualHost *:80>
         ServerName fgapiserver
+        WSGIPassAuthorization On
         WSGIDaemonProcess fgapiserver user=$FGAPISERVER_APPHOSTUNAME group=Admin processes=2 threads=5 home=$HOME/$FGAPISERVER_GITREPO python-path=$MYSQLPYPATH
         WSGIProcessGroup fgapiserver
         WSGIScriptAlias /fgapiserver $HOME/$FGAPISERVER_GITREPO/fgapiserver.wsgi
