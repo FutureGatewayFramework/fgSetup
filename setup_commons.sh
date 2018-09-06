@@ -560,7 +560,8 @@ git_clone_or_update() {
 #   $CMD - The command to execute
 #   $RES - Return code of the executed command 
 #   $1   - Error message to report in case of failure
-#   $CMD_OUT, $CMD_ER created during installation startup, they must exist
+#   $2   - Further info in case of success
+#   $CMD_OUT, $CMD_ERR created during installation startup, they must exist
 exec_cmd() {
   eval $CMD >$CMD_OUT 2>$CMD_ERR
   RES=$?

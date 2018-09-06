@@ -77,38 +77,31 @@ APTPACKAGES=(
 )
 CMD="install_apt ${APTPACKAGES[@]}"
 exec_cmd "Error installing required packages"
-out "done" 0 1
 
 # Check mysql client
 out "Looking up mysql client ... " 1
 CMD="MYSQL=\$(which mysql)"
-exec_cmd "Did not find mysql command"
-out "done ($MYSQL)" 0 1
+exec_cmd "Did not find mysql command" "($MYSQL)"
 
 # Check mysql version
 out "Looking up mysql version ... " 1
 CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
-exec_cmd "Did not retrieve mysql version"
-out "done ($MYSQLVER)" 0 1
+exec_cmd "Did not retrieve mysql version" "($MYSQLVER)"
         
 #Check connectivity
 out "Checking mysql connectivity ... " 1 
 CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
 exec_cmd "Missing mysql connectivity"
-out "done" 0 1 
 
 #Check apache2
 out "Checking apache2 ... " 1
 CMD="sudo service apache2 start"
 exec_cmd "Service apache2 wont start"
-out "done" 0 1
 
 # Getting or updading software from Git
 out "Clone or update from Git ... " 1
 CMD="git_clone_or_update \"$GIT_BASE\" \"$FGAPISERVER_GITREPO\" \"$FGAPISERVER_GITTAG\""
 exec_cmd "Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
-out "done" 0 1
-
 
 out "Preparing the environment ..."
 
@@ -117,7 +110,6 @@ cd fgAPIServer
 out "Installing python virtualenv and dependencies ..." 1
 CMD="sudo pip install --upgrade pip virtualenv && RES=0"
 exec_cmd "Unable to install python virtualenv"
-out "done" 0 1
 
 # Install requirements in virtual environment
 out "Installing requirements in virtualenv ..." 1
@@ -129,7 +121,6 @@ CMD="RES=1 &&\
      RES=0"
 exec_cmd "Unable to install python requirements"
 cd - 2>/dev/null >/dev/null
-out "done" 0 1
 
 # Take care of config values to setup fgapiserver.conf properly
    
@@ -230,7 +221,6 @@ EOF
 fi
 # Now take care of environment settings
 out "Setting up '"$FGAPISERVER_APPHOSTUNAME"' user profile ..."
-   
 # Preparing user environment in .fgprofile/APIServerDaemon file
 #   BGDB variables
 #   DB macro functions
