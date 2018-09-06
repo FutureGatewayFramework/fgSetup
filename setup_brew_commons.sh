@@ -56,8 +56,9 @@ check_and_create_user() {
     ULNAME=$([ "$2" = "" ] && echo $1 || echo "$2")
     UPASSWD=$([ "$3" = "" ] && openssl rand -hex 4 || echo "$3")
     if [ "$UNAME" != "" ]; then 
-        [ $(exists_osx_user "$UNAME" && echo $?) ] || add_osx_user $UNAME $ULNAME $UPASSWD
+        [ $(exists_osx_user "$UNAME" && RES=$?) ] || add_osx_user $UNAME $ULNAME $UPASSWD
     fi
+    return $RES
 }
 
 # Install a given brew package
