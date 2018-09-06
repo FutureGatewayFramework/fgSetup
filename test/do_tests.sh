@@ -7,6 +7,9 @@
 # Load setup environment variables
 source fgSetup/setup_config.sh
 
+# Load setup common functions
+source fgSetup/setup_commons.sh
+
 # Used token during tests using PTV
 TKN="________TEST_TKN________"
 
@@ -14,12 +17,9 @@ TKN="________TEST_TKN________"
 [ ! -f .fgsetup ] &&\
   cd fgSetup &&\
   ./setup_futuregateway.sh &&\
-  cd - &&
-  printf "Waiting a minute to ensure services are properly running ... " &&
-  sleep 60 &&
-  echo "done" &&
+  cd - >/dev/null 2>/dev/null &&
   touch .fgsetup ||\
-  echo "Setup already executed"
+  out "Setup already executed"
 
 # Setup PTV simulator for test running
 PTV=$(sudo su - futuregateway -c "screen -ls | grep ptv")
@@ -31,8 +31,11 @@ PTV=$(sudo su - futuregateway -c "screen -ls | grep ptv")
               pwd &&\
               source ./.venv/bin/activate &&\
               ./fgapiserver_ptv.py &&\
-              sleep 60 || sleep 60\"" ||\
-  echo "PTV already running"
+              sleep 60 || sleep 60\"" &&\
+  out "Waiting a minute to ensure PTV is properly running ... " 1 &&\
+  sleep 60 &&\
+  out "done" 0 1 ||\
+  out "PTV already running"
 
 # Test functions and variables
 
@@ -41,12 +44,12 @@ TEMP_FILES=()
 
 # Create temporary files
 cleanup_tempFiles() {
-  echo "Cleaning temporary files:"
+  out "Cleaning temporary files:"
   for tempfile in ${TEMP_FILES[@]}
   do
-    printf "Cleaning up '"$tempfile"' ... "
+    out "Cleaning up '"$tempfile"' ... " 1
     rm -rf $tempfile
-    echo "done"
+    out "done" 0 1
   done
 }
 
@@ -69,7 +72,8 @@ do_test() {
   TEST_CASE=$2
   TEST_FILE=$(printf "%04d_%s" $TEST_CNT "$2")
 
-  printf "Test (%04d) - '$1' ... " $TEST_CNT
+  TEST_MSG=$(printf "Test (%04d) - '$1' ... " $TEST_CNT)
+  out "$TEST_MSG" 1
   if [ ! -f $TEST_FILE ]; then
     $TEST_CMD >$TEST_OUT 2>$TEST_ERR
     RES=$?
@@ -79,24 +83,25 @@ do_test() {
       cat $TEST_CMD > .tests/$TEST_FILE.cmd
       cat $TEST_OUT > .tests/$TEST_FILE.out
       cat $TEST_ERR > .tests/$TEST_FILE.err
-      echo "passed"
+      out "passed" 0 1
     else
-      echo "failed"
-      echo "Test command:"
+      out "failed" 0 1
+      out "Test command:"
       cat $TEST_CMD
-      echo "Test output:"
+      out "Test output:"
       cat $TEST_OUT
-      echo "Test error:"
+      out "Test error:"
       cat $TEST_ERR
     fi
   else
-    echo "passed"
+    out "passed" 0 1
   fi
 }
 
 #
 # Test cases, below:
 #
+out "Starting testing"
 
 
 #

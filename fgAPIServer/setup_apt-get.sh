@@ -224,7 +224,7 @@ startfg() {
   cd $HOME 
   . ./venv/bin/activate
   python fgapiserver.py
-  cd -
+  cd - >/dev/null 2>/dev/null
 }
 
 stopfg() {
