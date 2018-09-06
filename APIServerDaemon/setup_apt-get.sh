@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FutureGateway APIServerDaemon brew version setup script
+# FutureGateway APIServerDaemon apt-get version setup script
 #
 # Author: Riccardo Bruno <riccardo.bruno@ct.infn.it>
 #
@@ -45,22 +45,10 @@ CMD_ERR=$(mktemp -t stderr.XXXXXX)
 TEMP_FILES+=( $CMD_OUT )
 TEMP_FILES+=( $CMD_ERR )
 
-out "Starting FutureGateway APIServerDaemon brew versioned setup script"
-
-out "Verifying package manager and APIServerDaemon user ..."
-
-# Check for brew and install it eventually
-check_and_setup_brew
+out "Starting FutureGateway APIServerDaemon apt-get versioned setup script"
 
 # Check for FutureGateway fgAPIServer unix user
 check_and_create_user $FGAPISERVER_APPHOSTUNAME
-
-# Mandatory packages installation
-if [ "$BREW" = "" ]; then
-  out "Did not find brew package manager"
-  exit 1
-fi
-out "Brew is on: \"$BREW\""
 
 # Mandatory packages installation
 out "Installing packages ..." 1
@@ -74,7 +62,7 @@ APTPACKAGES=(
   mysql-client
   ant
   maven
-  tomcat
+  tomcat7
   openjdk-7-jdk
 )
 CMD="install_apt ${APTPACKAGES[@]}"
@@ -300,3 +288,4 @@ out "User profile successfully created"
 
 out "Successfully finished FutureGateway APIServerDaemon brew versioned setup script"
 exit $RES
+
