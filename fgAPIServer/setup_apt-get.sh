@@ -194,7 +194,7 @@ if [ $RES -eq 0 ]; then
     </VirtualHost>
 </IfModule>
 EOF
-        [ ! -l $APACHE_CONFDIR_ENABLED/fgapiserver.conf ] &&\
+        [ ! -L $APACHE_CONFDIR_ENABLED/fgapiserver.conf ] &&\
           sudo ln -s $APACHE_CONFDIR_AVAILABLE/fgapiserver.conf $APACHE_CONFDIR_ENABLED/fgapiserver.conf
         sudo su - -c "chmod o-w $APACHE_CONFDIR_AVAILABLE && chmod o-w $APACHE_CONFDIR_ENABLED"
         sudo service apache2 restart >/dev/null 2>/dev/null
@@ -257,7 +257,7 @@ EOF
        # Executing fgAPIServer service
        sudo service fgapiserver start
        # In case switching from wsgi to stand-alone
-       [ -l $APACHE_CONFDIR_ENABLED/fgapiserver.conf ] && sudo service apache2 restart
+       [ -L $APACHE_CONFDIR_ENABLED/fgapiserver.conf ] && sudo service apache2 restart
    fi
    # Now take care of environment settings
    out "Setting up '"$FGAPISERVER_APPHOSTUNAME"' user profile ..."

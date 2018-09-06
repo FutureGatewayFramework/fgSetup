@@ -368,5 +368,7 @@ setup_PreRequisites && \
 setup_CheckHosts && \
 setup_CheckScripts && \
 setup && \
-out "FutureGateway installation terminated"
+out "FutureGateway installation terminated" &&\
+exit 0 || exit 1
+
 
