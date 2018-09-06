@@ -194,7 +194,8 @@ if [ $RES -eq 0 ]; then
     </VirtualHost>
 </IfModule>
 EOF
-        sudo ln -s $APACHE_CONFDIR_AVAILABLE/fgapiserver.conf $APACHE_CONFDIR_ENABLED/fgapiserver.conf
+        [ ! -l $APACHE_CONFDIR_ENABLED/fgapiserver.conf ] &&\
+          sudo ln -s $APACHE_CONFDIR_AVAILABLE/fgapiserver.conf $APACHE_CONFDIR_ENABLED/fgapiserver.conf
         sudo su - -c "chmod o-w $APACHE_CONFDIR_AVAILABLE && chmod o-w $APACHE_CONFDIR_ENABLED"
         sudo service apache2 restart >/dev/null 2>/dev/null
    else

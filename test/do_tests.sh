@@ -4,15 +4,24 @@
 # Author: Riccardo Bruno <riccardo.bruno@ct.infn.it>
 #
 
+# Load setup environment variables
+source fgSetup/setup_config.sh
+
+# Used token during tests using PTV
 TKN="________TEST_TKN________"
 
+# Setup FutureGateway
 [ ! -f .fgsetup ] &&\
   cd fgSetup &&\
   ./setup_futuregateway.sh &&\
   cd - &&
+  printf "Waiting a minute to ensure services are properly running ... " &&
+  sleep 60 &&
+  echo "done" &&
   touch .fgsetup ||\
   echo "Setup already executed"
 
+# Setup PTV simulator for test running
 PTV=$(sudo su - futuregateway -c "screen -ls | grep ptv")
 [ "$PTV" == "" ] &&\
   sudo su - futuregateway\
@@ -24,6 +33,8 @@ PTV=$(sudo su - futuregateway -c "screen -ls | grep ptv")
               ./fgapiserver_ptv.py &&\
               sleep 60 || sleep 60\"" ||\
   echo "PTV already running"
+
+# Test functions and variables
 
 # The array above contains any global scope temporaty file
 TEMP_FILES=()
@@ -84,16 +95,16 @@ do_test() {
 }
 
 #
-# Test counter
+# Test cases, below:
 #
-TEST_CNT=0
+
 
 #
 # PTV
 #
 
 cat >$TEST_CMD <<EOF
-curl -f -d token="________TEST_TKN________" -u "tokenver_user:tokenver_pass" http://localhost:8889/checktoken
+curl -f -d token="________TEST_TKN________" -u "$FGAPISERVER_PTVUSER:$FGAPISERVER_PTVPASS" $FGAPISERVER_PTVENDPOINT 
 EOF
 do_test "PTV checktoken" "ptv_checktoken"
 
@@ -102,7 +113,7 @@ do_test "PTV checktoken" "ptv_checktoken"
 #
 
 cat >$TEST_CMD <<EOF
-curl -f -H "Authorization: Bearer $TKN" http://localhost/fgapiserver/1.0/tasks
+curl -f -H "Authorization: Bearer $TKN" http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/tasks
 EOF
 do_test "API: /tasks" "api_tasks"
 
