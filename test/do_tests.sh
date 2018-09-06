@@ -1,6 +1,8 @@
 #
 # Test script for FutureGateway
 #
+# Author: Riccardo Bruno <riccardo.bruno@ct.infn.it>
+#
 
 TKN="________TEST_TKN________"
 
@@ -50,21 +52,22 @@ TEMP_FILES+=( TEST_ERR )
 
 # Perform test
 do_test() {
+  [ ! -d ".tests" ] && mkdir .tests
+  [ "$TEST_CNT" == "" ] && TEST_CNT=1 || TEST_CNT=$((TEST_CNT+1))
   TEST_NAME=$1
   TEST_CASE=$2
+  TEST_FILE=$(printf "%04d_%s" $TEST_CNT "$2")
 
-  printf "Test - '$1' ... "
-  if [ ! -f $TEST_CASE ]; then
+  printf "Test (%04d) - '$1' ... " $TEST_CNT
+  if [ ! -f $TEST_FILE ]; then
     $TEST_CMD >$TEST_OUT 2>$TEST_ERR
     RES=$?
     if [ $RES -eq 0 ]; then
-      echo "Test name: $TEST_NAME" > $TEST_CASE
-      echo "Test command:"  >> $TEST_CASE
-      cat $TEST_CMD >> $TEST_CASE
-      echo "Test output:" >> $TEST_CASE
-      cat $TEST_OUT >> $TEST_CASE
-      echo "Test error:" >> $TEST_CASE
-      cat $TEST_ERR >> $TEST_CASE
+      # Produce json file for test execution
+      echo "$TEST_NAME" > .tests/$TEST_FILE.name
+      cat $TEST_CMD > .tests/$TEST_FILE.cmd
+      cat $TEST_OUT > .tests/$TEST_FILE.out
+      cat $TEST_ERR > .tests/$TEST_FILE.err
       echo "passed"
     else
       echo "failed"
@@ -81,20 +84,29 @@ do_test() {
 }
 
 #
+# Test counter
+#
+TEST_CNT=0
+
+#
 # PTV
 #
 
 cat >$TEST_CMD <<EOF
 curl -f -d token="________TEST_TKN________" -u "tokenver_user:tokenver_pass" http://localhost:8889/checktoken
 EOF
-do_test "PTV checktoken" ".ptv_checktoken"
+do_test "PTV checktoken" "ptv_checktoken"
 
 #
-# APISrv
+# APIServer
 #
+
 cat >$TEST_CMD <<EOF
 curl -f -H "Authorization: Bearer $TKN" http://localhost/fgapiserver/1.0/tasks
 EOF
-do_test "API: /tasks" ".api_tasks"
+do_test "API: /tasks" "api_tasks"
 
+#
+# APIServerDaemon
+#
 
