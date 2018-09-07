@@ -81,12 +81,12 @@ exec_cmd "Error installing required packages"
 # Check mysql client
 out "Looking up mysql client ... " 1
 CMD="MYSQL=\$(which mysql)"
-exec_cmd "Did not find mysql command" "($MYSQL)"
+exec_cmd "Did not find mysql command" "(\$MYSQL)"
 
 # Check mysql version
 out "Looking up mysql version ... " 1
 CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
-exec_cmd "Did not retrieve mysql version" "($MYSQLVER)"
+exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
         
 #Check connectivity
 out "Checking mysql connectivity ... " 1 

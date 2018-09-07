@@ -84,29 +84,22 @@ if [ $RES -eq 0 ]; then
     # Check mysql client
     out "Looking up mysql client ... " 1
     CMD="MYSQL=\$(which mysql)"
-    exec_cmd "Did not find mysql command"
-    out "done ($MYSQL)" 0 1
+    exec_cmd "Did not find mysql command" "(\$MYSQL)"
 
     # Check mysql client
     out "Looking up mysql version ... " 1
     CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
-    exec_cmd "Did not retrieve mysql version"
-    out "done ($MYSQLVER)" 0 1
+    exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
 
     #Check connectivity
     out "Checking mysql connectivity ... " 1
     CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
     exec_cmd "Missing mysql connectivity"
-    out "done" 0 1
 fi
 
 # Getting or updading software from Git (database in fgAPIServer repo)
-git_clone_or_update "$GIT_BASE" "$FGAPISERVER_GITREPO" "$FGAPISERVER_GITTAG"
-RES=$?
-if [ $RES -ne 0 ]; then
-   out "ERROR: Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
-   exit 1
-fi 
+CMD="git_clone_or_update \"\$GIT_BASE\" \"\$FGAPISERVER_GITREPO\" \"\$FGAPISERVER_GITTAG\""
+exec_cmd "Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
 
 out "Preparing the environment ..."
 
