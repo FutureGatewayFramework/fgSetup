@@ -277,13 +277,6 @@ fi
 
 # Getting or updading software from Git
 out "Getting APIServerDaemon source components ... " 1
-WAIM=$(whoami)
-WD=$(pwd)
-LSH=$(ls -ld /home/futuregateway)
-out "=========================================================================================================================================="
-out "who am i = $WAIM"
-out "wordir = $WD"
-out "list home = $LSH"
 MISSING_GITREPO="";
 git_clone_or_update "$GNCENG_GIT_BASE" "$GNCENG_GITREPO" "$GNCENG_GITTAG" ||\
     MISSING_GITREPO=$MISSING_GITREPO"$GNCENG_GITREPO "
@@ -385,6 +378,8 @@ cat >$FGAPISERVERENVFILEPATH <<EOF
 # Very specific APIServerDaemon service components environment must be set here
 #
 # Author: Riccardo Bruno <riccardo.bruno@ct.infn.it>
+export CATALINA_HOME=${CATALINA_HOME}
+export CATALINA_BASE=${CATALINA_BASE}
 EOF
 #for vgdbvar in ${FGAPISERVER_VARS[@]}; do
 #    echo "$vgdbvar=${!vgdbvar}" >> $FGAPISERVERENVFILEPATH
