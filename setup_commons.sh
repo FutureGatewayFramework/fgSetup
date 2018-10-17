@@ -565,6 +565,9 @@ git_clone_or_update() {
 exec_cmd() {
   eval $CMD >$CMD_OUT 2>$CMD_ERR
   RES=$?
+  INFO_CMD=""
+  INFO_OUT=""
+  INFO_ERR=""
   [ "$2" != "" ] &&\
     INFO_CMD=$(echo "echo \"$2\"") &&\
     INFO_OUT=$(eval $INFO_CMD)
