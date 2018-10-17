@@ -199,6 +199,7 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      sudo mkdir -p \$CATALINA_HOME/shared/classes &&\
      sudo chown -R tomcat7.tomcat7 /var/log/tomcat7 &&\
      sudo chown -R tomcat7.tomcat7 /var/lib/tomcat7/logs &&\
+     sudo mv -n $CATALINA_BASE/webapps/ROOT $CATALINA_HOME/webapps/ &&\
      cd \$CATALINA_HOME/conf &&\
      sudo rm -f tomcat-users.xml &&\
      sudo ln -s \$TOMCAT_USRFILE tomcat-users.xml &&\
@@ -221,13 +222,14 @@ mysql -u root userstracking -e "" 1>/dev/null 2>/dev/null &&\
 # Do not use service since containers may not accept this way
 # Starting Tomcat using startup script
 out "Checking for $CATALINA service ... " 1
-CMD="CATALINAP=$(ps -ef | grep $CATALINA | grep -v grep | awk '{ print \$2 }')"
+CMD="CATALINAP=$(ps -ef | grep \$CATALINA | grep -v grep | awk '{ print \$2 }')"
 exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
 
 if [ "$CATALINAP" = "" ]; then
   out "Starting $CATALINA ..." 1
   CMD="sudo $CATALINA_HOME/bin/catalina.sh start &&\
-       CATALINAP=$(ps -ef | grep $CATALINA | grep -v grep | awk '{ print \$2 }')"
+       CATALINAP=\$(ps -ef | grep \$CATALINA | grep -v grep | awk '{ print \$2 }') &&\
+       [ \"\$CATALINAP\" != \"\" ]"
   exec_cmd "Unable to start service $CATALINA"\
            "($CATALINA: \$CATALINAP')"
 fi
