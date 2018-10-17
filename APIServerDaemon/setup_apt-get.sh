@@ -207,6 +207,17 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      cd -"
 exec_cmd "Unable to setup Tomcat7 directories"
 
+# Create Grid and Cloud engine UsersTrackingDB
+out "Installing Grid and Cloud Engine UsersTrackingDB ... "
+INSTALL_UTDB=0
+mysql -u root userstracking -e "" 1>/dev/null 2>/dev/null &&\
+  out "UsersTrackingDB already present" ||\
+  INSTALL_UTDB=1
+[ $INSTALL_UTDB -ne 0 ] &&\
+  CMD="sudo mysql -u root < grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql" &&\
+  exec_cmd "Unable to setup Grid and Cloud Engine UsersTrackingDB" ||\
+  out "Grid and Cloud Engine UsersTrackingDB already present"
+
 # Do not use service since containers may not accept this way
 # Starting Tomcat using startup script
 out "Checking for $CATALINA service ... " 1
