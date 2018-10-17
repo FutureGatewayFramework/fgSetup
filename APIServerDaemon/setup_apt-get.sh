@@ -62,6 +62,7 @@ APTPACKAGES=(
   coreutils
   jq
   mysql-client
+  libmysql-java
   ant
   maven
   tomcat7
@@ -112,90 +113,105 @@ CMD="[ \"\$CATALINA_HOME\" != \"\" -a \"\$CATALINA_BASE\" != \"\" ]"
 exec_cmd "Did not find Tomcat environment variables CATALINA_HOME or CATALINA_BASE"
 
 cat >$CMD_FILE <<EOF
-sudo updatedb &&\
-TOMCAT_USRFILE=\$(locate tomcat-users.xml | head -n 1) &&\
-sudo cp \$TOMCAT_USRFILE \${TOMCAT_USRFILE}_orig &&\
-LN=\$(cat \${TOMCAT_USRFILE}_orig | grep -n "</tomcat-users>" | awk -F":" '{ print \$1 }') &&\
-ALN=\$(cat \${TOMCAT_USRFILE}_orig | wc -l) &&\
-sudo cat \${TOMCAT_USRFILE}_orig | head -n \$((LN-1)) > \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\"manager-gui\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\"manager-script\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\"tomcat\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\"liferay\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <user username=\"$TOMCAT_USER\" password=\"$TOMCAT_PASSWORD\" roles=\"tomcat,liferay,manager-gui,manager-script\"/>" >> \$TOMCAT_USRFILE &&\
-sudo cat \${TOMCAT_USRFILE}_orig | tail -n \$((ALN-LN+1)) >> \$TOMCAT_USRFILE
+TOMCAT_CONFDIR=/etc/tomcat7 &&\
+TOMCAT_USRFILE=\$TOMCAT_CONFDIR/tomcat-users.xml &&\
+sudo chmod -R 644 \$TOMCAT_CONFDIR &&\
+sudo chmod g+x,o+x,o+w \$TOMCAT_CONFDIR &&\
+sudo chmod g+x,g+w,o+w \$TOMCAT_USRFILE &&\
+sudo cp -n \$TOMCAT_USRFILE \${TOMCAT_USRFILE}_fgsetup &&\
+LN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | grep -n "</tomcat-users>" | awk -F":" '{ print \$1 }') &&\
+ALN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | wc -l) &&\
+sudo cat \${TOMCAT_USRFILE}_fgsetup | head -n \$((LN-1)) > \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\\"manager-gui\\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\\"manager-script\\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\\"tomcat\\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\\"liferay\\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <user username=\\\"$TOMCAT_USER\\\" password=\\\"$TOMCAT_PASSWORD\\\" roles=\\\"tomcat,liferay,manager-gui,manager-script\\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo cat \${TOMCAT_USRFILE}_fgsetup | tail -n \$((ALN-LN+1)) >> \$TOMCAT_USRFILE &&\
+sudo chmod o-w \$TOMCAT_CONFDIR &&\
+sudo chmod o-w \$TOMCAT_USRFILE 
 EOF
 CMD=$(cat $CMD_FILE)
 exec_cmd "Unable to configure tomcat user roles"
 
 out "Setup mysql-connector" 1
 CMD="sudo updatedb &&\
-     MYSQL_CONNECTOR=\$(locate mysql-connector-java.jar) &&\
+     MYSQL_CONNECTOR=\$(locate mysql-connector-java | grep jar | head -n 1) &&\
      cd \$CATALINA_HOME/lib &&\
+     sudo rm -f mysql-connector-java.jar &&\
      sudo ln -s \$MYSQL_CONNECTOR mysql-connector-java.jar &&\
-     [ -L  \$MYSQL_CONNECTOR mysql-connector-java.jar ]"
+     [ -L mysql-connector-java.jar ] &&\
+     cd -"
 exec_cmd "Unable to setup mysql-connector" "(\$MYSQL_CONNECTOR)"
 
 out " Configuring GridEngine connection pools" 1
 cat >$CMD_FILE <<EOF
-sudo chmod 644 $CATALINA_HOME/conf/server.xml &&\
-sudo chmod g+x /usr/local/tomcat/conf &&\
-sudo cp $CATALINA_HOME/conf/server.xml $CATALINA_HOME/conf/server.xml_orig &&\
-LN=\$(cat $CATALINA_HOME/conf/server.xml_orig | grep -n "</GlobalNamingResources>" | awk -F":" '{ print $1 }') &&\
-ALN=\$(cat $CATALINA_HOME/conf/server.xml_orig | wc -l) &&\
-sudo cat $CATALINA_HOME/conf/server.xml_orig | head -n \$((LN-1)) > $CATALINA_HOME/conf/server.xml &&\
-sudo echo "               <Resource name=\"jdbc/UserTrackingPool\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           auth=\"Container\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           type=\"javax.sql.DataSource\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           username=\"$UTDB_USER\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           password=\"$UTDB_PASSWORD\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           driverClassName=\"com.mysql.jdbc.Driver\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           url=\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           testOnBorrow=\"true\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           testWhileIdle=\"true\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           validationInterval=\"0\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           initialSize=\"3\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           maxTotal=\"100\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           maxIdle=\"30\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           maxWaitMillis=\"10000\"/>" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                 <Resource name=\"jdbc/gehibernatepool\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           auth=\"Container\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           type=\"javax.sql.DataSource\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           username=\"$UTDB_USER\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           password=\"$UTDB_PASSWORD\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           driverClassName=\"com.mysql.jdbc.Driver\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           url=\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           testOnBorrow=\"true\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           testWhileIdle=\"true\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           validationInterval=\"0\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           initialSize=\"3\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           maxTotal=\"100\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           maxIdle=\"30\"" >> $CATALINA_HOME/conf/server.xml &&\
-sudo echo "                           maxWaitMillis=\"10000\"/>" >> $CATALINA_HOME/conf/server.xml &&\
-sudo cat $CATALINA_HOME/conf/server.xml_orig | tail -n \$((ALN-LN+1)) >> $CATALINA_HOME/conf/server.xml
+TOMCAT_CONFDIR=/etc/tomcat7 &&\
+SERVER_XML=\$TOMCAT_CONFDIR/server.xml &&\
+sudo chmod g+x,g+w,o+x,o+w \$TOMCAT_CONFDIR &&
+sudo chmod g+r,g+w,o+r,o+w \$SERVER_XML &&\
+sudo cp -n \$SERVER_XML \${SERVER_XML}_fgsetup &&\
+LN=\$(cat \${SERVER_XML}_fgsetup | grep -n "</GlobalNamingResources>" | awk -F":" '{ print \$1 }') &&\
+ALN=\$(cat \${SERVER_XML}_fgsetup | wc -l) &&\
+sudo cat \${SERVER_XML}_fgsetup | head -n \$((LN-1)) > \$SERVER_XML &&\
+sudo echo "               <Resource name=\\\"jdbc/UserTrackingPool\\\"" >> \$SERVER_XML &&\
+sudo echo "                           auth=\\\"Container\\\"" >> \$SERVER_XML &&\
+sudo echo "                           type=\\\"javax.sql.DataSource\\\"" >> \$SERVER_XML &&\
+sudo echo "                           username=\\\"$UTDB_USER\\\"" >> \$SERVER_XML &&\
+sudo echo "                           password=\\\"$UTDB_PASSWORD\\\"" >> \$SERVER_XML &&\
+sudo echo "                           driverClassName=\\\"com.mysql.jdbc.Driver\\\"" >> \$SERVER_XML &&\
+sudo echo "                           url=\\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\\"" >> \$SERVER_XML &&\
+sudo echo "                           testOnBorrow=\\\"true\\\"" >> \$SERVER_XML &&\
+sudo echo "                           testWhileIdle=\\\"true\\\"" >> \$SERVER_XML &&\
+sudo echo "                           validationInterval=\\\"0\\\"" >> \$SERVER_XML &&\
+sudo echo "                           initialSize=\\\"3\\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxTotal=\\\"100\\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxIdle=\\\"30\\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxWaitMillis=\\\"10000\\\"/>" >> \$SERVER_XML &&\
+sudo echo "                 <Resource name=\\\"jdbc/gehibernatepool\\\"" >> \$SERVER_XML &&\
+sudo echo "                           auth=\\\"Container\\\"" >> \$SERVER_XML &&\
+sudo echo "                           type=\\\"javax.sql.DataSource\\\"" >> \$SERVER_XML &&\
+sudo echo "                           username=\\\"$UTDB_USER\\\"" >> \$SERVER_XML &&\
+sudo echo "                           password=\\\"$UTDB_PASSWORD\\\"" >> \$SERVER_XML &&\
+sudo echo "                           driverClassName=\\\"com.mysql.jdbc.Driver\\\"" >> \$SERVER_XML &&\
+sudo echo "                           url=\\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\\"" >> \$SERVER_XML &&\
+sudo echo "                           testOnBorrow=\\\"true\\\"" >> \$SERVER_XML &&\
+sudo echo "                           testWhileIdle=\\\"true\\\"" >> \$SERVER_XML &&\
+sudo echo "                           validationInterval=\\\"0\\\"" >> \$SERVER_XML &&\
+sudo echo "                           initialSize=\\\"3\\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxTotal=\\\"100\\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxIdle=\\\"30\\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxWaitMillis=\\\"10000\\\"/>" >> \$SERVER_XML &&\
+sudo cat \${SERVER_XML}_fgsetup | tail -n \$((ALN-LN+1)) >> \$SERVER_XML &&\
+sudo chmod g+x,g-w,o+x,o-w \$TOMCAT_CONFDIR &&\
+sudo chmod g+r,g-w,o+r,o-w \$SERVER_XML &&\
+unset SERVER_XML
 EOF
 CMD=$(cat $CMD_FILE)
 exec_cmd "Unable to setup UserTracking connection pools"
 
 # It seems a missing directory exists
-sudo mkdir -p /usr/share/tomcat7/logs
-sudo mkdir -p /usr/share/tomcat7/common/classes
-sudo mkdir -p /usr/share/tomcat7/server/classes
-sudo mkdir -p /usr/share/tomcat7/shared/classes
-sudo chown -R tomcat7.tomcat7 /var/log/tomcat7
-sudo chown -R tomcat7.tomcat7 /var/lib/tomcat7/logs
+out "Setting up Tomcat directories ... " 1
+CMD="sudo mkdir -p /usr/share/tomcat7/logs &&\
+     sudo mkdir -p /usr/share/tomcat7/common/classes &&\
+     sudo mkdir -p /usr/share/tomcat7/server/classes &&\
+     sudo mkdir -p /usr/share/tomcat7/shared/classes &&\
+     sudo chown -R tomcat7.tomcat7 /var/log/tomcat7 &&\
+     sudo chown -R tomcat7.tomcat7 /var/lib/tomcat7/logs"
+exec_cmd "Unable to setup Tomcat7 directories"
 
 # Do not use service since containers may not accept this way
 # Starting Tomcat using startup script
-out "Executing $CATALINA service ... " 1
-TOMCATP=$(ps -ef | grep $CATALINA | grep -v grep | awk '{ print $2 }')
-if [ "$TOMCATP" != "" ]; then
-  out "Service $CATALINA executing with process: $TOMCATP"
-else
+out "Checking for $CATALINA service ... " 1
+CMD="CATALINAP=$(ps -ef | grep $CATALINA | grep -v grep | awk '{ print \$2 }')"
+exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
+
+if [ "$CATALINAP" = "" ]; then
   out "Starting $CATALINA ..." 1
-  CMD="$CATALINA_HOME/bin/catalina.sh start"
+  CMD="sudo $CATALINA_HOME/bin/catalina.sh start &&\
+       CATALINAP=$(ps -ef | grep $CATALINA | grep -v grep | awk '{ print \$2 }')"
   exec_cmd "Unable to start service $CATALINA"\
-           "($CATALINA: \$(ps -ef | grep \$CATALINA | grep -v grep | awk '{ print \$2 }')"
+           "($CATALINA: \$CATALINAP')"
 fi
     
 # Check mysql client
@@ -232,6 +248,10 @@ if [ "$OCCI" != "" -a -d /etc/grid-security/vomsdir -a -d /etc/vomses/ ]; then
     out "WARNING: Most probably OCCI client and GSI are already installed; skipping their installation"
 else
     curl -L http://go.egi.eu/fedcloud.ui | sudo /bin/bash -
+    # Fix apt list files, otherwise apt will not work anymore
+    sudo rm -f /etc/apt/sources.list.d/UMD-3-base.list\
+               /etc/apt/sources.list.d/UMD-3-updates.list\
+               /etc/apt/sources.list.d/rocci.list 
 
     # Now configure VO fedcloud.egi.eu
     sudo mkdir -p /etc/grid-security/vomsdir/fedcloud.egi.eu
@@ -246,7 +266,6 @@ EOF
 /C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience SSL CA 3
 EOF
     sudo chmod o-w /etc/grid-security/vomsdir/fedcloud.egi.eu
-
     sudo mkdir -p /etc/vomses
     sudo chmod o+w /etc/vomses
     sudo cat >> /etc/vomses/fedcloud.egi.eu << EOF 
@@ -256,19 +275,23 @@ EOF
     sudo chmod o-w /etc/vomses
 fi
 
-# It seems OCCI generates wrong entries in sources.list.d
-rm -f /etc/apt/sources.list.d/UMD-3-*.list
-
 # Getting or updading software from Git
-MISSING_GITREPO=""
-CMD="MISSING_GITREPO=\"\";\
-     git_clone_or_update \"\$GNCENG_GIT_BASE\" \"\$GNCENG_GITREPO\" \"\$GNCENG_GITTAG\" ||\
-     MISSING_GITREPO=\$MISSING_GITREPO\"\$GNCENG_GITREPO \";\
-     git_clone_or_update \"\$ROCCI_GIT_BASE\" \"\$ROCCI_GITREPO\" \"\$ROCCI_GITTAG\" ||\
-     MISSING_GITREPO=\$MISSING_GITREPO\"$ROCCI_GITREPO \";\
-     git_clone_or_update \"\$GIT_BASE\" \"\$APISERVERDAEMON_GITREPO\" \"$APISERVERDAEMON_GITTAG\" ||\
-     MISSING_GITREPO=\$MISSING_GITREPO\"\$APISERVERDAEMON_GITREPO \";\
-     [ "$MISSING_GITREPO" == "" ]"
+out "Getting APIServerDaemon source components ... " 1
+WAIM=$(whoami)
+WD=$(pwd)
+LSH=$(ls -ld /home/futuregateway)
+out "=========================================================================================================================================="
+out "who am i = $WAIM"
+out "wordir = $WD"
+out "list home = $LSH"
+MISSING_GITREPO="";
+git_clone_or_update "$GNCENG_GIT_BASE" "$GNCENG_GITREPO" "$GNCENG_GITTAG" ||\
+    MISSING_GITREPO=$MISSING_GITREPO"$GNCENG_GITREPO "
+git_clone_or_update "$ROCCI_GIT_BASE" "$ROCCI_GITREPO" "$ROCCI_GITTAG" ||\
+    MISSING_GITREPO=$MISSING_GITREPO"$ROCCI_GITREPO "
+git_clone_or_update "$GIT_BASE" "$APISERVERDAEMON_GITREPO" "$APISERVERDAEMON_GITTAG" ||\
+    MISSING_GITREPO=$MISSING_GITREPO"$APISERVERDAEMON_GITREPO "
+CMD="[ \"$MISSING_GITREPO\" == \"\" ]"
 exec_cmd "Following Git repositories failed to clone/update: \"$MISSING_GITREPO\"" "" "missing repositories: \"$MISSING_GITREPO\""
 
 #
@@ -342,9 +365,7 @@ if [ "$MISSING_COMPILATION" != "" ]; then
   out "ERROR: Following components did not compile successfully: \"$MISSING_COMPILATION\""
   exit 1
 fi
-
 out "Successfully compiled all APIServerDaemon components"
-
 
 # Environment setup
 out "Preparing the environment ..."
@@ -374,9 +395,7 @@ EOF
 #declare -f dbcn  >> $FGAPISERVERENVFILEPATH
 #out "done" 0 1
 out "User profile successfully created"
-   
 
-
-out "Successfully finished FutureGateway APIServerDaemon brew versioned setup script"
+out "Successfully finished FutureGateway APIServerDaemon apt-get versioned setup script"
 exit $RES
 
