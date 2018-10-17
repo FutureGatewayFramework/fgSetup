@@ -122,11 +122,11 @@ sudo cp -n \$TOMCAT_USRFILE \${TOMCAT_USRFILE}_fgsetup &&\
 LN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | grep -n "</tomcat-users>" | awk -F":" '{ print \$1 }') &&\
 ALN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | wc -l) &&\
 sudo cat \${TOMCAT_USRFILE}_fgsetup | head -n \$((LN-1)) > \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\\"manager-gui\\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\\"manager-script\\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\\"tomcat\\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\\"liferay\\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <user username=\\\"$TOMCAT_USER\\\" password=\\\"$TOMCAT_PASSWORD\\\" roles=\\\"tomcat,liferay,manager-gui,manager-script\\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\"manager-gui\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\"manager-script\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\"tomcat\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <role rolename=\\"liferay\\"/>" >> \$TOMCAT_USRFILE &&\
+sudo echo "                 <user username=\\"$TOMCAT_USER\\" password=\\"$TOMCAT_PASSWORD\\" roles=\\"tomcat,liferay,manager-gui,manager-script\\"/>" >> \$TOMCAT_USRFILE &&\
 sudo cat \${TOMCAT_USRFILE}_fgsetup | tail -n \$((ALN-LN+1)) >> \$TOMCAT_USRFILE &&\
 sudo chmod o-w \$TOMCAT_CONFDIR &&\
 sudo chmod o-w \$TOMCAT_USRFILE 
@@ -154,50 +154,57 @@ sudo cp -n \$SERVER_XML \${SERVER_XML}_fgsetup &&\
 LN=\$(cat \${SERVER_XML}_fgsetup | grep -n "</GlobalNamingResources>" | awk -F":" '{ print \$1 }') &&\
 ALN=\$(cat \${SERVER_XML}_fgsetup | wc -l) &&\
 sudo cat \${SERVER_XML}_fgsetup | head -n \$((LN-1)) > \$SERVER_XML &&\
-sudo echo "               <Resource name=\\\"jdbc/UserTrackingPool\\\"" >> \$SERVER_XML &&\
-sudo echo "                           auth=\\\"Container\\\"" >> \$SERVER_XML &&\
-sudo echo "                           type=\\\"javax.sql.DataSource\\\"" >> \$SERVER_XML &&\
-sudo echo "                           username=\\\"$UTDB_USER\\\"" >> \$SERVER_XML &&\
-sudo echo "                           password=\\\"$UTDB_PASSWORD\\\"" >> \$SERVER_XML &&\
-sudo echo "                           driverClassName=\\\"com.mysql.jdbc.Driver\\\"" >> \$SERVER_XML &&\
-sudo echo "                           url=\\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\\"" >> \$SERVER_XML &&\
-sudo echo "                           testOnBorrow=\\\"true\\\"" >> \$SERVER_XML &&\
-sudo echo "                           testWhileIdle=\\\"true\\\"" >> \$SERVER_XML &&\
-sudo echo "                           validationInterval=\\\"0\\\"" >> \$SERVER_XML &&\
-sudo echo "                           initialSize=\\\"3\\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxTotal=\\\"100\\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxIdle=\\\"30\\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxWaitMillis=\\\"10000\\\"/>" >> \$SERVER_XML &&\
-sudo echo "                 <Resource name=\\\"jdbc/gehibernatepool\\\"" >> \$SERVER_XML &&\
-sudo echo "                           auth=\\\"Container\\\"" >> \$SERVER_XML &&\
-sudo echo "                           type=\\\"javax.sql.DataSource\\\"" >> \$SERVER_XML &&\
-sudo echo "                           username=\\\"$UTDB_USER\\\"" >> \$SERVER_XML &&\
-sudo echo "                           password=\\\"$UTDB_PASSWORD\\\"" >> \$SERVER_XML &&\
-sudo echo "                           driverClassName=\\\"com.mysql.jdbc.Driver\\\"" >> \$SERVER_XML &&\
-sudo echo "                           url=\\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\\"" >> \$SERVER_XML &&\
-sudo echo "                           testOnBorrow=\\\"true\\\"" >> \$SERVER_XML &&\
-sudo echo "                           testWhileIdle=\\\"true\\\"" >> \$SERVER_XML &&\
-sudo echo "                           validationInterval=\\\"0\\\"" >> \$SERVER_XML &&\
-sudo echo "                           initialSize=\\\"3\\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxTotal=\\\"100\\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxIdle=\\\"30\\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxWaitMillis=\\\"10000\\\"/>" >> \$SERVER_XML &&\
+sudo echo "               <Resource name=\\"jdbc/UserTrackingPool\\"" >> \$SERVER_XML &&\
+sudo echo "                           auth=\\"Container\\"" >> \$SERVER_XML &&\
+sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERVER_XML &&\
+sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
+sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
+sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
+sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\"" >> \$SERVER_XML &&\
+sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
+sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
+sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
+sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxWaitMillis=\\"10000\\"/>" >> \$SERVER_XML &&\
+sudo echo "                 <Resource name=\\"jdbc/gehibernatepool\\"" >> \$SERVER_XML &&\
+sudo echo "                           auth=\\"Container\\"" >> \$SERVER_XML &&\
+sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERVER_XML &&\
+sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
+sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
+sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
+sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\"" >> \$SERVER_XML &&\
+sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
+sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
+sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
+sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
+sudo echo "                           maxWaitMillis=\\"10000\\"/>" >> \$SERVER_XML &&\
 sudo cat \${SERVER_XML}_fgsetup | tail -n \$((ALN-LN+1)) >> \$SERVER_XML &&\
 sudo chmod g+x,g-w,o+x,o-w \$TOMCAT_CONFDIR &&\
-sudo chmod g+r,g-w,o+r,o-w \$SERVER_XML &&\
-unset SERVER_XML
+sudo chmod g+r,g-w,o+r,o-w \$SERVER_XML
 EOF
 CMD=$(cat $CMD_FILE)
 exec_cmd "Unable to setup UserTracking connection pools"
 
 # It seems a missing directory exists
 out "Setting up Tomcat directories ... " 1
-CMD="sudo mkdir -p /usr/share/tomcat7/logs &&\
-     sudo mkdir -p /usr/share/tomcat7/common/classes &&\
-     sudo mkdir -p /usr/share/tomcat7/server/classes &&\
-     sudo mkdir -p /usr/share/tomcat7/shared/classes &&\
+CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
+     sudo mkdir -p \$CATALINA_HOME/logs &&\
+     sudo mkdir -p \$CATALINA_HOME/conf &&\
+     sudo mkdir -p \$CATALINA_HOME/common/classes &&\
+     sudo mkdir -p \$CATALINA_HOME/server/classes &&\
+     sudo mkdir -p \$CATALINA_HOME/shared/classes &&\
      sudo chown -R tomcat7.tomcat7 /var/log/tomcat7 &&\
-     sudo chown -R tomcat7.tomcat7 /var/lib/tomcat7/logs"
+     sudo chown -R tomcat7.tomcat7 /var/lib/tomcat7/logs &&\
+     cd \$CATALINA_HOME/conf &&\
+     sudo rm -f tomcat-users.xml &&\
+     sudo ln -s \$TOMCAT_USRFILE tomcat-users.xml &&\
+     sudo rm -f server.xml &&\
+     sudo ln -s \$SERVER_XML server.xml &&\
+     cd -"
 exec_cmd "Unable to setup Tomcat7 directories"
 
 # Do not use service since containers may not accept this way
