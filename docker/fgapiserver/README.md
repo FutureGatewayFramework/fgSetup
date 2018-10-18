@@ -1,6 +1,20 @@
 # fgapiserver
 Docker build scripts for FutureGateway component 'fgapiserver'
 
+## Usage
+Use one of the following make recipes:
+* `make image` Build the Docker image file
+* `make run` Executes the docker container
+* `make publish` Publishes the image in the Docker-hub
+
+Before to execute the Makefile, please have a look in the Makefile variables, in particular:
+* `DOCKER_REPO` Used for publishing in the hub
+* `IMAGE_NAME` The name of the image file
+* `IMAGE_TAG` Tag to assign to the image
+* `FG_NETWORK` Name of the Docker network dedicated to the FG components
+* `FG_IOSNDBXVOLNAME` Volume name to store FutureGateway IO Sandbox
+* `FGAPISRV_IOSANDBOX` Container path to the IO Sandbox dir
+
 ## Configuration
 The **fgapiserver** component requires the following variables to properly generate its Docker image:
 
