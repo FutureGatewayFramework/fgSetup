@@ -34,4 +34,3 @@ In this section it is possible to point the source code extraction to a particul
 * `GNCENG` Git repository address
 * `GNCENG_BRANCH` GridAnClouddEngine Git repository branch name
 * `PTV_HSTPRT` fgAPIServer PTV service endpoint
-

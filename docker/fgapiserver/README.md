@@ -51,7 +51,3 @@ FGAPISRV_APPSDIR Directory hosting applications
 * `UTDB_USER` GridAnClouddEngine database user
 * `UTDB_PASSWORD` GridAnClouddEngine database password
 * `UTDB_DATABASE` GridAnClouddEngine database name
-
-
- 
- 

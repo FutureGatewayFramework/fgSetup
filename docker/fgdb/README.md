@@ -42,4 +42,3 @@ Executor interfaces such as the GridAndCloudEngine, may require a dedicated DB
 * `UTDB_DATABASE` GridAnClouddEngine database name
 * `GNCENG` Git repository address
 * `GNCENG_BRANCH` GridAnClouddEngine Git repository branch name
-
