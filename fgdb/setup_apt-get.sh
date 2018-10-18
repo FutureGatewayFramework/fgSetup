@@ -52,6 +52,7 @@ out "Verifying package manager and fgdb user ..."
 check_and_create_user $FGDB_HOSTUNAME
 
 # Mandatory packages installation
+out "Installing packages ... " 1
 APTPACKAGES=(
   curl
   git
@@ -60,34 +61,28 @@ APTPACKAGES=(
   jq
   mysql-server
 )
-install_apt ${APTPACKAGES[@]} 
-RES=$?
+CMD="install_apt ${APTPACKAGES[@]}"
+exec_cmd "Failed installing required packages"
 
-# Continue only if packages have been installed correctly
-if [ $RES -eq 0 ]; then
-    out "Starting mysql service ... " 1
-    # Using restart since mysql could be already running
-    CMD="sudo service mysql start 2>$CMD_ERR >$CMD_OUT"
-    exec_cmd "Unable to start mysql service"
+out "Starting mysql service ... " 1
+# Using restart since mysql could be already running
+CMD="sudo service mysql start 2>$CMD_ERR >$CMD_OUT"
+exec_cmd "Unable to start mysql service"
     
-    # Check mysql client
-    out "Looking up mysql client ... " 1
-    CMD="MYSQL=\$(which mysql)"
-    exec_cmd "Did not find mysql command"
-    out "done ($MYSQL)" 0 1
+# Check mysql client
+out "Looking up mysql client ... " 1
+CMD="MYSQL=\$(which mysql)"
+exec_cmd "Did not find mysql command" "(\$MYSQL)"
 
-    # Check mysql client
-    out "Looking up mysql version ... " 1
-    CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
-    exec_cmd "Did not retrieve mysql version"
-    out "done ($MYSQLVER)" 0 1    
+# Check mysql client
+out "Looking up mysql version ... " 1
+CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
+exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
     
-    #Check connectivity
-    out "Checking mysql connectivity ... " 1
-    CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
-    exec_cmd "Missing mysql connectivity"
-    out "done" 0 1    
-fi
+#Check connectivity
+out "Checking mysql connectivity ... " 1
+CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
+exec_cmd "Missing mysql connectivity"
 
 # Getting or updading software from Git (database in fgAPIServer repo)
 CMD="git_clone_or_update \"$GIT_BASE\" \"$FGAPISERVER_GITREPO\" \"$FGAPISERVER_GITTAG\""
@@ -121,7 +116,7 @@ if [ $ASDBCOUNT -ne 0 ]; then
   # Database exists; determine version and patch
   out "APIServerDatabase exists; deterimne its version ... " 1
   CMD="ASDBVER=\$(asdb \"select version from db_patches order by 1 desc limit 1;\")"
-  exec_cmd "Unable to determine FG database version" " ($ASDBVER)"
+  exec_cmd "Unable to determine FG database version" "(\$ASDBVER)"
   
   # Database exists; it's time to update it
   out "Attempting to patch APIServer database ... " 

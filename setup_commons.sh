@@ -560,13 +560,23 @@ git_clone_or_update() {
 #   $CMD - The command to execute
 #   $RES - Return code of the executed command 
 #   $1   - Error message to report in case of failure
-#   $CMD_OUT, $CMD_ER created during installation startup, they must exist
+#   $2   - Further info in case of success
+#   $CMD_OUT, $CMD_ERR created during installation startup, they must exist
 exec_cmd() {
   eval $CMD >$CMD_OUT 2>$CMD_ERR
   RES=$?
+  INFO_CMD=""
+  INFO_OUT=""
+  INFO_ERR=""
+  [ "$2" != "" ] &&\
+    INFO_CMD=$(echo "echo \"$2\"") &&\
+    INFO_OUT=$(eval $INFO_CMD)
+  [ "$3" != "" ] &&\
+     INFO_CMD=$(echo "echo \"$3\"") &&\
+     INFO_ERR=$(eval $INFO_CMD)
   if [ $RES -ne 0 ]; then
     out "failed" 0 1
-    out "ERROR: \"$1\""
+    out "ERROR: \"${1}${INFO_ERR}\""
     out "Command: \"$CMD\""
     out "Output:"
     out "$(cat $CMD_OUT)"
@@ -574,7 +584,9 @@ exec_cmd() {
     out "$(cat $CMD_ERR)"
     exit 1
  else
-    out "done$2" 0 1
+    INFO_CMD=$(echo "echo \"$2\"") 
+    INFO_OUT=$(eval $INFO_CMD)
+    out "done${INFO_OUT}" 0 1
  fi
 }
 

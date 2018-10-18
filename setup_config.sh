@@ -128,6 +128,8 @@ APISERVERDAEMON_ENVS="APISERVERDAEMON_SETUP\
                       APISERVERDAEMON_SSHPORT\
                       APISERVERDAEMON_GITREPO\
                       APISERVERDAEMON_GITTAG\
+                      TOMCAT_USER\
+                      TOMCAT_PASSWORD\
                       UTDB_FGAPPID\
                       UTDB_HOST\
                       UTDB_HOSTUNAME\
@@ -167,13 +169,17 @@ APISERVERDAEMON_ENVS="APISERVERDAEMON_SETUP\
                       TOSCAIDC_FGAPISRV_PTVENDPOINT\
                       TOSCAIDC_FGAPISRV_PTVUSER\
                       TOSCAIDC_FGAPISRV_PTVPASS"
-APISERVERDAEMON_SETUP=0                 # Enable this flag to setup APIServerDaemon
+APISERVERDAEMON_SETUP=1                 # Enable this flag to setup APIServerDaemon
 APISERVERDAEMON_HOST=127.0.0.1          # APIServerDaemon host address
 APISERVERDAEMON_HOSTUNAME=futuregateway # APIServerDaemon host username
 APISERVERDAEMON_PORT=8080               # APIServerDaemon port number
 APISERVERDAEMON_SSHPORT=22              # APIServerDaemon SSH port number
 APISERVERDAEMON_GITREPO=APIServerDaemon # fgAPIServer Git repository name
 APISERVERDAEMON_GITTAG="master"         # fgAPIServer Git repository tag/branch name
+
+# Tomcat user
+TOMCAT_USER=tomcat_user              # Tomcat username
+TOMCAT_PASSWORD=tomcat_P@ss          # Tomcat password
 
 # GridnCloud Engine DB settings (GridnCloud Engine EI)
 UTDB_FGAPPID=10000                   # FutureGateway appId in GridnCloud Engine

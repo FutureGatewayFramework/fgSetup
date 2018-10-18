@@ -41,6 +41,8 @@ check_and_create_user() {
       out "Unable to add user: $FGDB_HOSTUNAME"
       exit 1
     fi
+  else
+    RES=0
   fi
   
   return $RES

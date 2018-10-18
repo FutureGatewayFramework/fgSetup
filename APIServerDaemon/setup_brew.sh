@@ -158,7 +158,7 @@ out "Extracting/installing software ..."
 
 # OCCI+(GSI)
 OCCI=$(which occi)
-if [ $OCCI != "" -a -d /etc/grid-security/vomsdir -a -d /etc/vomses/ ]; then
+if [ "$OCCI" != "" -a -d /etc/grid-security/vomsdir -a -d /etc/vomses/ ]; then
   out "WARNING: Most probably OCCI client and GSI are already installed; skipping their installation"
 else
     curl -L http://go.egi.eu/fedcloud.ui | sudo /bin/bash -
