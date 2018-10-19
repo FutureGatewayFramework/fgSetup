@@ -27,7 +27,7 @@ The installation process foresees the following steps:
 2. Modify the setup\_config.sh file configuring each FutureGateway service as designed in the previous step. Each FutureGateway component contains its own specific settings inside the setup\_config.sh script. Any FG user specified in the configurion file setup\_config.sh must be already present in its host system with passwordless sudo authorization as well as SSH key exchange with the installation node.
 3. From the installation host, execute the script setup\_futuregateway.sh. The first time the setup procedure will install from Git all selected components, while further executions will try to upgrade the components and update its configurations accordingly with the values placed in the file setup\_config.sh
 
-
+[fgdb]: <https://github.com/indigo-dc/APIServerDaemon>
 [PortalSetup]: <https://github.com/indigo-dc/PortalSetup>
 [fgAPIServer]: <https://github.com/indigo-dc/fgAPIServer>
 [APIServerDaemon]: <https://github.com/indigo-dc/APIServerDaemon>
