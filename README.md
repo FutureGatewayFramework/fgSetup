@@ -14,7 +14,7 @@ The setup procedure supports the following FutureGateway components:
 * Liferay7 - A liferay portal and eventually its SDK, linked to the APIServer
 
 # Architectures
-The setup procedure supports the followin OS architectures, actually differentiated only by the package manager applicaions:
+The setup procedure supports the following OS architectures, actually differentiated only by the package manager applicaions:
 
 * brew - MacOSx 10.x (Brew can be installed during installation)
 * apt - Debian/Ubuntu(14.04)
