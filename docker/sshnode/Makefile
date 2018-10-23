@@ -39,7 +39,7 @@ apiserverdaemon:
 	echo $$ASD_CONTAINER &&\
 	[ "`docker ps -aqf name=apiserverdaemon`" != "" ] &&\
             docker exec  $$ASD_CONTAINER\
-	    /bin/bash -c 'echo "Host fgtest">>/etc/ssh/ssh_config &&\
+	    /bin/bash -c 'echo "Host $(IMAGE_NAME)">>/etc/ssh/ssh_config &&\
 	                  echo "    StrictHostKeyChecking no">>/etc/ssh/ssh_config &&\
 			  echo "    UserKnownHostsFile=/dev/null">>/etc/ssh/ssh_config'\
 	|| echo "APIServerDaemon is not running"
@@ -53,7 +53,7 @@ run: network apiserverdaemon
 	  docker run -d\
                --net $(FG_NETWORK)\
                --name $(IMAGE_NAME)_$(IMAGE_TAG)\
-               -h sshnode \
+               -h $(IMAGE_NAME) \
                --add-host "fgdb:$$FGDB_IP"\
                $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)||\
         echo "Sorry, FGDB node is not running!"
