@@ -208,17 +208,6 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      cd -"
 exec_cmd "Unable to setup Tomcat7 directories"
 
-# Create Grid and Cloud engine UsersTrackingDB
-out "Installing Grid and Cloud Engine UsersTrackingDB ... "
-INSTALL_UTDB=0
-mysql -u root userstracking -e "" 1>/dev/null 2>/dev/null &&\
-  out "UsersTrackingDB already present" ||\
-  INSTALL_UTDB=1
-[ $INSTALL_UTDB -ne 0 ] &&\
-  CMD="sudo mysql -u root < grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql" &&\
-  exec_cmd "Unable to setup Grid and Cloud Engine UsersTrackingDB" ||\
-  out "Grid and Cloud Engine UsersTrackingDB already present"
-
 # Do not use service since containers may not accept this way
 # Starting Tomcat using startup script
 out "Checking for $CATALINA service ... " 1
@@ -307,6 +296,17 @@ git_clone_or_update "$GIT_BASE" "$APISERVERDAEMON_GITREPO" "$APISERVERDAEMON_GIT
 CMD="[ \"$MISSING_GITREPO\" == \"\" ]"
 exec_cmd "Following Git repositories failed to clone/update: \"$MISSING_GITREPO\"" "" "missing repositories: \"$MISSING_GITREPO\""
 
+# Create Grid and Cloud engine UsersTrackingDB
+out "Installing Grid and Cloud Engine UsersTrackingDB ... "
+INSTALL_UTDB=0
+mysql -u root userstracking -e "" 1>/dev/null 2>/dev/null &&\
+  out "UsersTrackingDB already present" ||\
+  INSTALL_UTDB=1
+[ $INSTALL_UTDB -ne 0 ] &&\
+  CMD="sudo mysql -u root < grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql" &&\
+  exec_cmd "Unable to setup Grid and Cloud Engine UsersTrackingDB" ||\
+  out "Grid and Cloud Engine UsersTrackingDB already present"
+
 #
 # Compiling APIServerDaemon components and executor interfaces
 #
@@ -344,9 +344,9 @@ replace_line $PROPF "apisrv_dbhost" "apisrv_dbhost = $FGDB_HOST"
 replace_line $PROPF "apisrv_dbport" "apisrv_dbport = $FGDB_PORT"
 replace_line $PROPF "apisrv_dbuser" "apisrv_dbuser = $FGDB_USER"
 replace_line $PROPF "apisrv_dbuser" "apisrv_dbuser = $FGDB_USER"
-replace_line $PROPF "apisrv_dbpass" "apisrv_dbpass = $FGDB_PASS"
+replace_line $PROPF "apisrv_dbpass" "apisrv_dbpass = $FGDB_PASSWD"
 replace_line $PROPF "apisrv_dbname" "apisrv_dbname = $FGDB_NAME"
-replace_line $PROPF "apisrv_dbver" "apisrv_dbver = $ASDBVER"
+replace_line $PROPF "apisrv_dbver" "apisrv_dbver = $FGDB_VER"
 replace_line $PROPF "asdMaxThreads" "asdMaxThreads = $APISERVERDAEMON_MAXTHREADS"
 replace_line $PROPF "asdCloseTimeout" "asdCloseTimeout = $APISERVERDAEMON_ASDCLOSETIMEOUT"
 replace_line $PROPF "gePollingDelay" "gePollingDelay = $APISERVERDAEMON_GEPOLLINGDELAY"

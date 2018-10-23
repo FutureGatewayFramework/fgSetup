@@ -41,7 +41,8 @@ FGDB_VARS="FGDB_HOST\
            FGDB_PASSWD\
            FGDB_SSHPORT\
            FGDB_GITREPO\
-           FGDB_GITTAG"
+           FGDB_GITTAG\
+           FGDB_VER"
 FGDB_HOST=127.0.0.1                  # Database server address
 FGDB_HOSTUNAME=$FG_USER              # Database host username
 FGDB_PORT=3306                       # Database port number
@@ -52,6 +53,7 @@ FGDB_PASSWD=fgapiserver_password     # Database username password
 FGDB_SSHPORT=22                      # Database ssh port number
 FGDB_GITREPO=fgAPIServer             # Database Git repository name
 FGDB_GITTAG="EnvConfig"              # Database Git repository tag/branch name
+FGDB_VER=0.0.12                      # Database schema version
 
 # API server front-end
 #
