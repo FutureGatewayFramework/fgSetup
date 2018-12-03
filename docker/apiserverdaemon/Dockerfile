@@ -171,7 +171,8 @@ RUN sudo chmod 644 $CATALINA_HOME/conf/server.xml &&\
     echo "                           initialSize=\"3\"" >> $CATALINA_HOME/conf/server.xml &&\
     echo "                           maxTotal=\"100\"" >> $CATALINA_HOME/conf/server.xml &&\
     echo "                           maxIdle=\"30\"" >> $CATALINA_HOME/conf/server.xml &&\
-    echo "                           maxWaitMillis=\"10000\"/>" >> $CATALINA_HOME/conf/server.xml &&\
+    echo "                           maxWaitMillis=\"10000\"" >> $CATALINA_HOME/conf/server.xml &&\
+    echo "                           validationQuery=\"select 1 as connection_test\"/>" >> $CATALINA_HOME/conf/server.xml &&\
     echo "                 <Resource name=\"jdbc/gehibernatepool\"" >> $CATALINA_HOME/conf/server.xml &&\
     echo "                           auth=\"Container\"" >> $CATALINA_HOME/conf/server.xml &&\
     echo "                           type=\"javax.sql.DataSource\"" >> $CATALINA_HOME/conf/server.xml &&\
@@ -185,7 +186,8 @@ RUN sudo chmod 644 $CATALINA_HOME/conf/server.xml &&\
     echo "                           initialSize=\"3\"" >> $CATALINA_HOME/conf/server.xml &&\
     echo "                           maxTotal=\"100\"" >> $CATALINA_HOME/conf/server.xml &&\
     echo "                           maxIdle=\"30\"" >> $CATALINA_HOME/conf/server.xml &&\
-    echo "                           maxWaitMillis=\"10000\"/>" >> $CATALINA_HOME/conf/server.xml &&\
+    echo "                           maxWaitMillis=\"10000\"" >> $CATALINA_HOME/conf/server.xml &&\
+    echo "                           validationQuery=\"select 1 as connection_test\"/>" >> $CATALINA_HOME/conf/server.xml &&\
     cat $CATALINA_HOME/conf/server.xml_orig | tail -n $((ALN-LN+1)) >> $CATALINA_HOME/conf/server.xml &&\
     echo "server.xml" &&\
     cat $CATALINA_HOME/conf/server.xml
