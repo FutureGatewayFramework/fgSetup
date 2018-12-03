@@ -167,7 +167,8 @@ sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XM
 sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
 sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
 sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxWaitMillis=\\"10000\\"/>" >> \$SERVER_XML &&\
+sudo echo "                           maxWaitMillis=\\"10000\\"" >> \$SERVER_XML &&\
+sudo echo "                           validationQuery=\\"select 1 as connection_test\\"/>" >> \$SERVER_XML &&\
 sudo echo "                 <Resource name=\\"jdbc/gehibernatepool\\"" >> \$SERVER_XML &&\
 sudo echo "                           auth=\\"Container\\"" >> \$SERVER_XML &&\
 sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERVER_XML &&\
@@ -181,7 +182,8 @@ sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XM
 sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
 sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
 sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxWaitMillis=\\"10000\\"/>" >> \$SERVER_XML &&\
+sudo echo "                           maxWaitMillis=\\"10000\\"" >> \$SERVER_XML &&\
+sudo echo "                           validationQuery=\\"select 1 as connection_test\\"/>" >> \$SERVER_XML &&\
 sudo cat \${SERVER_XML}_fgsetup | tail -n \$((ALN-LN+1)) >> \$SERVER_XML &&\
 sudo chmod g+x,g-w,o+x,o-w \$TOMCAT_CONFDIR &&\
 sudo chmod g+r,g-w,o+r,o-w \$SERVER_XML
