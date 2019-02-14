@@ -9,7 +9,7 @@ ENV FG_USER=futuregateway\
  FG_DIR=/home/futuregateway\
  FGAPISRV_APPSDIR=/app/apps\
  FGAPISERVER_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git\
- FGAPISERVER_BRANCH=master\
+ FGAPISERVER_BRANCH=releasing_user_api_envconfig\
 # Environment for fgdb
  MYSQL_ROOT_PASSWORD=rpass\
  FGDB_HOST=fgdb\
@@ -18,7 +18,7 @@ ENV FG_USER=futuregateway\
  FGDB_PASSWD=fgapiserver_password\
  FGDB_NAME=fgapiserver\
 # Environment for ei_gridengine EI
- UTDB_HOST=$FGDB_HOST\
+ UTDB_HOST=fgdb\
  UTDB_PORT=3306\
  UTDB_USER=tracking_user\
  UTDB_PASSWORD=usertracking\
@@ -50,11 +50,11 @@ ENV FG_USER=futuregateway\
  FGAPISRV_PTVDEFUSR=futuregateway\
  FGAPISRV_PTVDEFGRP=administrator\
  FGAPISRV_PTVMAPFILE=fgapiserver_ptvmap.json\
- FGAPISRV_DB_HOST=$FGDB_HOST\
- FGAPISRV_DB_PORT=$FGDB_PORT\
- FGAPISRV_DB_USER=$FGDB_USER\
- FGAPISRV_DB_PASS=$FGDB_PASSWD\ 
- FGAPISRV_DB_NAME=$FGDB_NAME
+ FGAPISRV_DB_HOST=fgdb\
+ FGAPISRV_DB_PORT=3306\
+ FGAPISRV_DB_USER=fgapiserver\
+ FGAPISRV_DB_PASS=fgapiserver_password\ 
+ FGAPISRV_DB_NAME=fgapiserver
 
 # User and working directory
 WORKDIR $FG_DIR
@@ -117,7 +117,8 @@ RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
 #    sed -i "s/^export UTDB_PASSWD.*/export UTDB_PASSWD=$UTDB_PASSWD/" .fgprofile/ei_gridengine &&\
 #    sed -i "s/^export UTDB_NAME.*/export UTDB_NAME=$UTDB_NAME/" .fgprofile/ei_gridengine &&\
     sed -i "s/^export UTDB_OPTS.*/export UTDB_OPTS=''/" .fgprofile/ei_gridengine &&\
-    cat .fgprofile/fgdb && cat .fgprofile/ei_gridengine
+    cat .fgprofile/fgdb &&\
+    cat .fgprofile/ei_gridengine
 
 
 # nginx port 80 available to the world outside this container
@@ -162,6 +163,7 @@ RUN ln -s fgapiserver.py main.py &&\
     sed -i "s/^fgapisrv_db_user.*/fgapisrv_db_user = $FGAPISRV_DB_USER/" fgapiserver.conf &&\
     sed -i "s/^fgapisrv_db_pass.*/fgapisrv_db_pass = $FGAPISRV_DB_PASS/" fgapiserver.conf &&\
     sed -i "s/^fgapisrv_db_name.*/fgapisrv_db_name = $FGAPISRV_DB_NAME/" fgapiserver.conf &&\
+    cat fgapiserver.conf &&\
     cp /app_orig/uwsgi.ini uwsgi.ini &&\
     pip install -r requirements.txt
 

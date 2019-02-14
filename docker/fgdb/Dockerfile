@@ -15,7 +15,7 @@ ENV FG_USER=futuregateway\
     FGDB_PASSWD=fgapiserver_password\
     FGDB_NAME=fgapiserver\
     FGDB_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git\
-    FGDB_BRANCH=master\
+    FGDB_BRANCH=releasing_user_api_envconfig\
 # Environment for scripts
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git\
     FGSETUP_BRANCH=master\
@@ -26,7 +26,7 @@ ENV FG_USER=futuregateway\
     UTDB_PASSWORD=usertracking\
     UTDB_DATABASE=userstracking\
     GNCENG=https://github.com/csgf/grid-and-cloud-engine.git\
-    GNCENG_BRANCH=FutureGateway
+    GNCENG_BRANCH=master
 
 # User and working directory
 WORKDIR $FG_DIR
@@ -58,16 +58,11 @@ RUN git clone $FGDB_GIT -b $FGDB_BRANCH
 # FG database
 RUN sed -i "s/drop\ database\ if\ exists\ fgapiserver;/drop\ database\ if\ exists\ $FGDB_NAME;/"  fgAPIServer/fgapiserver_db.sql &&\
     sed -i "s/create\ database\ fgapiserver;/create\ database\ $FGDB_NAME;/" fgAPIServer/fgapiserver_db.sql &&\
-# FG user@%
-    sed -i "s/create\ user\ 'fgapiserver'\@'%'/create\ user\ '$FGDB_USER'\@'%'/" fgAPIServer/fgapiserver_db.sql &&\
-    sed -i "s/alter\ user\ 'fgapiserver'\@'%'\ identified\ by\ \"fgapiserver_password\";/alter\ user\ 'fgapiserver'\@'%'\ identified\ by\ \"$FGDB_PASSWD\";/" fgAPIServer/fgapiserver_db.sql &&\
-    sed -i "s/on\ fgapiserver.\*/on\ $FGDB_NAME.\*/" fgAPIServer/fgapiserver_db.sql &&\
-    sed -i "s/to\ 'fgapiserver'\@'%'/to\ '$FGDB_USER'\@'%'/" fgAPIServer/fgapiserver_db.sql &&\
-# FG user@localhost
-    sed -i "s/create\ user\ 'fgapiserver'\@'localhost'/create\ user\ '$FGDB_USER'\@'localhost'/" fgAPIServer/fgapiserver_db.sql &&\
-    sed -i "s/alter\ user\ 'fgapiserver'\@'localhost'\ identified\ by\ \"fgapiserver_password\";/alter\ user\ 'fgapiserver'\@'localhost'\ identified\ by\ \"$FGDB_PASSWD\";/" fgAPIServer/fgapiserver_db.sql &&\
-    sed -i "s/on\ fgapiserver.\*/on\ $FGDB_NAME.\*/" fgAPIServer/fgapiserver_db.sql &&\
-    sed -i "s/to\ 'fgapiserver'\@'localhost'/to\ '$FGDB_USER'\@'localhost'/" fgAPIServer/fgapiserver_db.sql
+# mysq5 uses script: fgapiserver_dbusr5.sql to create FG users
+    sed -i "s/grant\ all\ on\ fgapiserver/grant\ all\ on\ $FGDB_NAME/g" fgAPIServer/fgapiserver_dbusr5.sql &&\
+    sed -i "s/TO\ \'fgapiserver\'@\'%\'/TO\ \'$FGDB_USER\'@\'%\'/g" fgAPIServer/fgapiserver_dbusr5.sql &&\
+    sed -i "s/TO\ \'fgapiserver\'@\'%\'/TO\ \'$FGDB_USER\'@\'localhost\'/g" fgAPIServer/fgapiserver_dbusr5.sql &&\
+    sed -i "s/IDENTIFIED\ BY\ \"fgapiserver_password\"/IDENTIFIED\ BY\ \"$FGDB_PASSWD\"/g" fgAPIServer/fgapiserver_dbusr5.sql
 
 # FutureGateway scripts
 RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
@@ -103,6 +98,7 @@ RUN git clone $GNCENG -b $GNCENG_BRANCH &&\
 USER root
 #RUN sed -i "s/#bind-address\t=\ 127.0.0.1/bind-address     =\ 127.0.0.1/" /etc/mysql/mysql.conf.d/mysqld.cnf
 RUN cat $FG_DIR/fgAPIServer/fgapiserver_db.sql > /docker-entrypoint-initdb.d/dbsetup.sql &&\
+    cat $FG_DIR/fgAPIServer/fgapiserver_dbusr5.sql >> /docker-entrypoint-initdb.d/dbsetup.sql &&\
     cat $FG_DIR/grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql >> /docker-entrypoint-initdb.d/dbsetup.sql
 
 # FGDB mySQL port available to the world outside this container

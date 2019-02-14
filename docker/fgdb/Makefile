@@ -8,9 +8,9 @@
 #
 DOCKER_REPO = futuregateway
 IMAGE_NAME = fgdb
-IMAGE_TAG = 0.1
-FG_NETWORK = fgnetwork
-FG_MYSQLDIRVOLNAME = fg_mysql
+IMAGE_TAG = 0.2
+FG_NETWORK = fgnetwork_test
+FG_MYSQLDIRVOLNAME = fg_mysql_test
 
 default:
 	@echo "Usage: make <image|pubimg>"

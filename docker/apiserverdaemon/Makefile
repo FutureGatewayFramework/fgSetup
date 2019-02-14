@@ -8,11 +8,11 @@
 #
 DOCKER_REPO = futuregateway
 IMAGE_NAME = apiserverdaemon
-IMAGE_TAG = 0.1
-FG_NETWORK = fgnetwork
-FG_APISRVVOLNAME = fg_apiserver
-FG_APPSDIRVOLNAME = fg_apps
-FG_IOSNDBXVOLNAME = fg_iosandbox
+IMAGE_TAG = 0.2
+FG_NETWORK = fgnetwork_test
+FG_APISRVVOLNAME = fg_apiserver_test
+FG_APPSDIRVOLNAME = fg_apps_test
+FG_IOSNDBXVOLNAME = fg_iosandbox_test
 FGAPISRV_IOSANDBOX = /app/fgiosandbox
 
 default:
