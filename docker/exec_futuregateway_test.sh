@@ -54,6 +54,25 @@ get_fg_nodes() {
 	  echo "All FutureGateway nodes successfully retrieved"
 }
 
+# FGDB requires a while in order to start. FG components depending on it may
+# fall into an inconsistent state and they require to be restarted
+align_installation() {
+  RESTART_SERVICES=(
+    $FGAPISERVER
+    $FGAPISERVERDAEMON
+  )
+  for service in ${RESTART_SERVICES[@]}; do
+    printf "Restarting container: $FGAPISERVER ..." &&\
+    docker container restart $service &&\
+    echo "ok" ||\
+    FAILED="failed"
+    [ "$FAILED" != "" ] &&\
+      echo $FAILED &&\
+      return 1
+  done
+  return 0
+}
+
 # Execute a given script into a Docker containerId
 #   $1 ContainerId
 #   $2 File containing the script to execute
@@ -169,6 +188,7 @@ run_tests() {
 # Test steps
 #
 get_fg_nodes &&\
+align_installation &&\
 setup_apiserverdaemon &&\
 setup_sshnode &&\
 setup_fgapiserver &&\
