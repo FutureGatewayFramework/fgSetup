@@ -62,7 +62,7 @@ align_installation() {
     $FGAPISERVERDAEMON_CID
   )
   for service in ${RESTART_SERVICES[@]}; do
-    printf "Restarting container: $FGAPISERVER ... " &&\
+    printf "Restarting container: $service ... " &&\
     docker container restart $service 2>&1 >/dev/null &&\
     echo "ok" ||\
     FAILED="failed"
