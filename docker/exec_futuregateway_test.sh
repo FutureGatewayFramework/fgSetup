@@ -15,7 +15,7 @@ ENV_FILE=.env
 
 # Verify test script
 [ ! -f $TEST_SCRIPT ] &&\
-    echo "Test script '$TEST_SCRIPT' not found"
+    echo "Test script '$TEST_SCRIPT' not found" &&\
     exit 1
 
 #
@@ -64,12 +64,27 @@ exec_script() {
 	SFL=$2
 	SUS=$3
 	SFN=$4
-    docker cp $SFL $CID:/tmp/$SFN &&\
-    docker exec $CID chmod +x /tmp/$SFN &&\
-    docker exec $CID /bin/bash -c su - $SUS -c /tmp/$SFN &&\
-    docker exec $CID rm /tmp/$SFN &&\
-    return 0 ||\
-    rerurn 1
+  docker cp $SFL $CID:/tmp/$SFN
+  CMD_FILE=$(mktemp)
+  cat >$CMD_FILE <<EOF
+chmod +x /tmp/$SFN
+chown $SUS /tmp/$SFN
+/bin/bash /tmp/$SFN
+rm -f /tmp/$SFN
+EOF
+    while read command; do
+      printf "Executing on $CID: '$command' ... "
+      docker exec -t $CID $command &&\
+      cmd_state="ok" ||\
+      cmd_state="fail"
+      echo "$cmd_state"
+      [ "$cmd_state" = "fail" ] &&\
+         break
+    done < $CMD_FILE
+    rm -f $CMD_FILE
+    [ "$cmd_state" != "ok" ] &&\
+      return 1
+    return 0
 }
 
 
@@ -79,34 +94,43 @@ setup_apiserverdaemon() {
     cat >$CFG_SCRIPT <<EOF
 echo "Host sshnode" >> /etc/ssh/ssh_config
 echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config
-echo "    UserKnownHostsFile=/dev/null >> /etc/ssh/ssh_config
+echo "    UserKnownHostsFile=/dev/null" >> /etc/ssh/ssh_config
 EOF
 	CFG_DONE=$(docker exec $FGAPISERVERDAEMON_CID cat /etc/ssh/ssh_config |\
 	          grep sshnode |\
 	          wc -l)
-    [ $CFG_DONE -eq 0 ] &&\
-        exec_script $FGAPISERVERDAEMON_CID\
-                    $CFG_SCRIPT\
-                    'futuregateway'\
-                    'cfg_sshnode.sh'
-        printf "fgAPIServerDaemon successfully configured to accept " ||\
-        printf "fgAPIServerDaemon altready configured to accept "
-    echo "sshnode connections using login/password credentals"
+    [ $CFG_DONE -ne 0 ] &&\
+      echo "APIServerDaemon altready configured" &&\
+      return 0
+
+    exec_script $FGAPISERVERDAEMON_CID\
+                $CFG_SCRIPT\
+                'root'\
+                'cfg_sshnode.sh' &&\
+    RES=0 ||\
+    RES=1
+
+    [ $RES -eq 0 ] &&\
+      echo "APIServerDaemon successfully configured" ||\
+      echo "ERROR: Failed to configure APIServerDaemon"
+
     rm -f $CFG_SCRIPT
+    return $RES
 }
 
 # Setup the SSHNode component
 setup_sshnode() {
     CFG_SCRIPT=$(mktemp)
     cat >$CFG_SCRIPT <<EOF
-adduser --disabled-password --gecos "" $TEST_USER   
+adduser --disabled-password --gecos "" $TEST_USER
 echo -e "$TEST_PASS\n$TEST_PASS" | passwd $TEST_USER
 EOF
-    CFG_DONE=$(docker exec $SSHNODE_CID ls -ld /home/test | wc -l)
+    CFG_DONE=$(docker exec $SSHNODE_CID ls -ld /home/test 2>/dev/null | wc -l)
     [ $CFG_DONE -eq 0 ] &&\
         exec_script $SSHNODE_CID\
                     $CFG_SCRIPT\
-                    'cfg_sshnode_user.sh'
+                    'futuregateway'\
+                    'cfg_sshnode_user.sh' &&\
         printf "sshnode successfully configured "||\
         printf "sshnode altready configured "
         echo "to connect with user: '$TEST_USER' using password: '$TEST_PASS'"
@@ -118,7 +142,11 @@ setup_fgapiserver() {
 	CFG_SCRIPT=$(mktemp)
 	cat >$CFG_SCRIPT <<EOF
 # By default LKNPTVFLAG is enabled, it is necessart to switch it off
-asdb "update srv_config set value=FALSE where name='fgapisrv_lnkptvflag';"
+# Load FutureGateway environment
+  cd /home/futuregateway &&\
+  . .fgprofile/commons &&\
+  . .fgprofile/fgdb &&\
+  asdb "update srv_config set value=FALSE where name='fgapisrv_lnkptvflag';"
 EOF
     exec_script $FGAPISERVER_CID\
                 $CFG_SCRIPT\
@@ -130,9 +158,9 @@ EOF
 
 # Run test script on fgapiserver node
 run_tests() {
-  [ $ -f $TEST_SCRIPT ] &&\
+  [ -f $TEST_SCRIPT ] &&\
     exec_script $FGAPISERVER_CID\
-                $CFG_SCRIPT\
+                $TEST_SCRIPT\
                 'futuregateway'\
                 $TEST_SCRIPT
 }

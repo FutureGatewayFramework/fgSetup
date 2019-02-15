@@ -7,6 +7,11 @@
 
 # Tests are done submitting SayHello application, this needs to 
 # This needs to change the setup_app file
+echo ""
+echo "------------------------------------------"
+echo "Testing FutureGateway core functionalities"
+echo "------------------------------------------"
+echo ""
 cd apps/sayhello
 
 
@@ -57,7 +62,7 @@ echo "Installed test infrastructure having id: '$INFRA_ID'"
   exit 1
 
 # Configure infrastructure in setup file
-sed -i "s/infrastructures\":\ \[1\]/infrastructures\":\ \[$INFRA_ID\]/" 
+sed -i "s/infrastructures\":\ \[1\]/infrastructures\":\ \[$INFRA_ID\]/" setup_app.sh
 sed -i "s/Authorization:\ Bearer/Authorization:\ /" setup_app.sh
 
 # Call setup script to install SayHello application
@@ -107,14 +112,16 @@ CNT=0
 MAXCNT=180
 LOOP_DELAY=60
 TASK_STATUS=""
-while [ "$TASK_STATUS" != "DONE" -a\
-        $CNT -lt $MAXCNT ]; do
-    TASK_STATUS=$(curl -H "Authorization: $TKN"\
-                  http://localhost/v1.0/tasks/$TASK_ID |\
-                  jq '.status' |\
-                  xargs echo) &&\
+while [ $CNT -lt $MAXCNT ]; do
+    TASK_STATUS=$(curl -s\
+                       -H "Authorization: $TKN"\
+                       http://localhost/v1.0/tasks/$TASK_ID |\
+                       jq '.status' |\
+                       xargs echo) &&\
     echo "Task having id: '$TASK_ID' has status: '$TASK_STATUS'"
-    sleep $LOOP_DELAY
+    [ "$TASK_STATUS" = 'DONE' ] &&\
+      break ||\
+      sleep $LOOP_DELAY
     CNT=$((CNT+1))
 done
 
@@ -143,4 +150,8 @@ else
 fi
 
 # Notify successful execution
+echo
+echo "-----------------------------------------"
 echo "Submission test successfully accomplished"
+echo "-----------------------------------------"
+echo

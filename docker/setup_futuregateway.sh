@@ -139,11 +139,11 @@ services:
      - "23306:3306"
     image: "$FGDB_IMG"
     volumes:
-     - fgvolume_ugrenvcfg_mysqldb:/var/lib/mysql
+     - fgvolume_${FGINSTANCE_NAME}_mysqldb:/var/lib/mysql
     networks:
-     - fg_network_ugrenvcfg
+     - fg_${FGINSTANCE_NAME}_network
     env_file:
-     - \$FGINSTANCE_ENVF
+     - ${FGINSTANCE_ENVF}
 
   fgapiserver:
     ports:
@@ -151,36 +151,37 @@ services:
      - "2889:8889"
     image: "$FGAPISERVER_IMG"
     volumes:
-     - fgvolume_ugrenvcfg_iosandbox:\${FGAPISRV_IOSANDBOX}
-     - fgvolume_ugrenvcfg_appsdir:\${FGAPISRV_APPSDIR}
+     - fgvolume_${FGINSTANCE_NAME}_iosandbox:\${FGAPISRV_IOSANDBOX}
+     - fgvolume_${FGINSTANCE_NAME}_appsdir:\${FGAPISRV_APPSDIR}
     networks:
-     - fg_network_ugrenvcfg
+     - fg_${FGINSTANCE_NAME}_network
     env_file:
-     - \$FGINSTANCE_ENVF
+     - ${FGINSTANCE_ENVF}
 
   fgapiserverdaemon:
     ports:
      - "38080:8080"
     image: "$FGAPISERVERDAEMON_IMG"
     networks:
-     - fg_network_ugrenvcfg
+     - fg_${FGINSTANCE_NAME}_network
     volumes:
-      - fgvolume_ugrenvcfg_iosandbox:\${FGAPISRV_IOSANDBOX}
+      - fgvolume_${FGINSTANCE_NAME}_iosandbox:\${FGAPISRV_IOSANDBOX}
     env_file:
-      - \$FGINSTANCE_ENVF
+      - ${FGINSTANCE_ENVF}
 
   sshnode:
     image: "$SSHNODE_IMG"
     networks:
-     - fg_network_ugrenvcfg
+     - fg_${FGINSTANCE_NAME}_network
     env_file:
-      - \$FGINSTANCE_ENVF
+      - ${FGINSTANCE_ENVF}
 
 volumes:
- fgvolume_\${FGINSTANCE_NAME}_mysqldb:
- fgvolume_\${FGINSTANCE_NAME}_iosandbox:
- fgvolume_\${FGINSTANCE_NAME}_appsdir:
+ fgvolume_${FGINSTANCE_NAME}_mysqldb:
+ fgvolume_${FGINSTANCE_NAME}_iosandbox:
+ fgvolume_${FGINSTANCE_NAME}_appsdir:
 networks:
- fg_\${FGINSTANCE_NAME}_network:
+ fg_${FGINSTANCE_NAME}_network:
 EOF
 echo "FutureGateway docker compose file: '$FGINSTANCE_CMPF' created"
+echo "To instantiate the FutureGateway execute: docker-compose up -d"
