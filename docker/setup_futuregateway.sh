@@ -27,7 +27,7 @@ SSHNODE_IMG=futuregateway/sshnode:0.2
 #
 # FutureGateway instance settings
 #
-FGINSTANCE_NAME="ugrenvcfg"
+FGINSTANCE_NAME="test"
 FGINSTANCE_ENVF=".env"
 FGINSTANCE_CMPF="docker-compose.yml"
 
@@ -146,6 +146,8 @@ services:
      - ${FGINSTANCE_ENVF}
 
   fgapiserver:
+    depends_on:
+     - fgdb
     ports:
      - "2888:\${FGAPISRV_PORT}"
      - "2889:8889"
@@ -159,6 +161,8 @@ services:
      - ${FGINSTANCE_ENVF}
 
   fgapiserverdaemon:
+    depends_on:
+     - fgdb
     ports:
      - "38080:8080"
     image: "$FGAPISERVERDAEMON_IMG"
