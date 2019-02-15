@@ -64,7 +64,7 @@ MYSQL_USER=$FGDB_USER
 #
 # fgAPIServer
 #
-FGAPISERVER_BRANCH=releasing_user_api_envconfig
+FGAPISERVER_BRANCH=master
 FGAPISERVER_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git
 # fgAPIServer configuration settings
 FGAPIVER=v1.0
@@ -101,7 +101,7 @@ PTV_HSTPRT=fgapiserver:$PTV_PORT
 #
 # APIServerDaemon
 #
-FGASD_BRANCH=releasing_user_api_envconfig
+FGASD_BRANCH=master
 FGASD_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git
 TOMCAT_PASSWORD=$ASD_TOMCAT_PASSWORD
 TOMCAT_USER=$ASD_TOMCAT_USER

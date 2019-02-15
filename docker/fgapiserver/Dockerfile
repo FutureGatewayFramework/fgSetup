@@ -9,7 +9,7 @@ ENV FG_USER=futuregateway\
  FG_DIR=/home/futuregateway\
  FGAPISRV_APPSDIR=/app/apps\
  FGAPISERVER_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git\
- FGAPISERVER_BRANCH=releasing_user_api_envconfig\
+ FGAPISERVER_BRANCH=master\
 # Environment for fgdb
  MYSQL_ROOT_PASSWORD=rpass\
  FGDB_HOST=fgdb\

@@ -15,7 +15,7 @@ ENV FG_USER=futuregateway\
     FGDB_PASSWD=fgapiserver_password\
     FGDB_NAME=fgapiserver\
     FGDB_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git\
-    FGDB_BRANCH=releasing_user_api_envconfig\
+    FGDB_BRANCH=master\
 # Environment for scripts
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git\
     FGSETUP_BRANCH=master\
