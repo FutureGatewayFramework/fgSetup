@@ -58,12 +58,12 @@ get_fg_nodes() {
 # fall into an inconsistent state and they require to be restarted
 align_installation() {
   RESTART_SERVICES=(
-    $FGAPISERVER
-    $FGAPISERVERDAEMON
+    $FGAPISERVER_CID
+    $FGAPISERVERDAEMON_CID
   )
   for service in ${RESTART_SERVICES[@]}; do
-    printf "Restarting container: $FGAPISERVER ..." &&\
-    docker container restart $service &&\
+    printf "Restarting container: $FGAPISERVER ... " &&\
+    docker container restart $service 2>&1 >/dev/null &&\
     echo "ok" ||\
     FAILED="failed"
     [ "$FAILED" != "" ] &&\
