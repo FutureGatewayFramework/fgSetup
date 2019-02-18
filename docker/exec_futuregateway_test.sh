@@ -61,10 +61,12 @@ align_installation() {
   printf "Waiting for FG database availability ... "
   MYSQL_RUNNING=0
   while [ $MYSQL_RUNNING -eq 0 ]; do
-    MYSQL_RUNNING=$(sudo docker exec -t $FGDB_CID service mysql status|\
-	            grep running |\
-		    wc -l)
+	  MYSQL_RUNNING=$(sudo docker logs $FGDB_CID 2>&1 |\
+		          tail -n 1 |\
+			  grep /var/run/mysqld/mysqld.sock |\
+			  wc -l)
   done
+  sleep 60
   echo "done"
   RESTART_SERVICES=(
     $FGAPISERVER_CID
