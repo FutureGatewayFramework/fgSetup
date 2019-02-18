@@ -57,6 +57,15 @@ get_fg_nodes() {
 # FGDB requires a while in order to start. FG components depending on it may
 # fall into an inconsistent state and they require to be restarted
 align_installation() {
+  # Wait for FGDB service first
+  printf "Waiting for FG database availability ... "
+  MYSQL_RUNNING=0
+  while [ $MYSQL_RUNNING -eq 0 ]; do
+    MYSQL_RUNNING=$(sudo docker exec -t $FGDB_CID service mysql status|\
+	            grep running |\
+		    wc -l)
+  done
+  echo "done"
   RESTART_SERVICES=(
     $FGAPISERVER_CID
     $FGAPISERVERDAEMON_CID
