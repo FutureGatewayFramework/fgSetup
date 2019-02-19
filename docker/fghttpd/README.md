@@ -52,3 +52,7 @@ In this section it is possible to point the source code extraction to a particul
 * `FG_LIFERAY_PROXY` ajp address for liferay portal
 
 
+## Notes
+The standard image published in the Docker Hub, contains a self signed host certificate, generated as reported by these [instructions][GENKEYS]. For production environment, these certificates have to be changed with real ones.
+
+[GENKEYS]: <https://www.akadia.com/services/ssh_test_certificate.html>

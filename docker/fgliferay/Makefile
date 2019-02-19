@@ -8,7 +8,7 @@
 #
 DOCKER_REPO = futuregateway
 IMAGE_NAME = fgliferay
-IMAGE_TAG = 0.1
+IMAGE_TAG = 0.2
 FG_NETWORK = fgnetwork
 FG_LIFERAYVOLNAME = fg_liferay
 LFRY_DBNAME = lportal

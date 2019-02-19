@@ -8,7 +8,7 @@
 #
 DOCKER_REPO = futuregateway
 IMAGE_NAME = fghttpd
-IMAGE_TAG = 0.1
+IMAGE_TAG = 0.2
 FG_NETWORK = fgnetwork
 FG_VOLUMESDIR = $$HOME/fgVolumes
 #IMAGE_LATEST_ID = $(shell docker image list | grep $(DOCKER_REPO)/$(IMAGE_NAME) | grep latest | awk '{ print $3 }')
