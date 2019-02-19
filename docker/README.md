@@ -1,10 +1,10 @@
 # Docker Installation
 
 This repository contains necessary files to instantiate FutureGateway components using Docker containers.
-There are two different kind of possible installations, the first uses a manual approach to configure and build each FutureGateway component, the second uses altready built images offering a faster approach to the installation process.
+There are two different kind of possible installations, the first uses a manual approach to configure and build each FutureGateway component, the second, called automated installation, uses altready built docker images offering a faster approach to the installation process.
 
 ## Automated installation
-The automated installation requires to almost no apply any change to existing files. This installation offers also the possibility to test the installed components.
+The automated installation requires to almost no apply any change to the existing files. This installation gives also the possibility to test the installed components.
 
 ### Installation procedure
 If your conteiner server does not host yet any FutureGateway instance, the automated installation is accomplished simply executing the following commands:
@@ -15,12 +15,13 @@ docker-compose up -d
 ```
 
 In case more than one FutureGateway instance is present, it is necessary to open the `stup_futuregateway.sh` file first, and change the environment variables related to the **instance settings** ensuring to generate unique names.
+It is possible that FG database component is not yet ready when other FG components are starting. For this reason ensure the fgapiserver and apiserverdaemon components connected to the DB correctly. To fix the FG components, it is enough to restart the relative components with `docker stop <container_id>`, and then `docker start <container_id>`. This is the way the test script described in the next chapter, uses to align FG running components. It is higly suggested to execute this script after the installation.
 
 ### Testing the instance
 To test the generated instance, the following commands have to be executed:
 
 ```bash
-$ ./setup_futuregateway_test.sh
+$ ./exec_futuregateway_test.sh
 ```
 
 ### Persistency and networking
@@ -29,6 +30,8 @@ $ ./setup_futuregateway_test.sh
  * `<docker>_fgvolume_<instance_name>_apiserver` - FutureGateway applications directory
  * `<docker>_fgvolume_<instance_name>_iosandbox` - FutureGateway I/O Sandboxing directory
  * `<docker>_fgvolume_<instance_name>_mysqldb` - Storing FutureGateay database tables
+
+Where the `<instance_name>` refers to the configuration variable `FGINSTANCE_NAME` in the setup file `setup_futuregateway.sh`.
 
 ## Manual installation
 In this kind of installation, each FutureGateway component has its own directory and each directory shares the same structure and installation procedure.
