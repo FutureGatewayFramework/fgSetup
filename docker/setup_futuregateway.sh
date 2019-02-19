@@ -129,6 +129,9 @@ TEST_PASS=$TEST_PASS
 EOF
 echo "Common FutureGateway environment file: '$FGINSTANCE_ENVF' created"
 
+# Source configuration in order to setup properly yml file
+. $FGINSTANCE_ENVF
+
 cat >$FGINSTANCE_CMPF <<EOF
 version: '3'
 
@@ -153,8 +156,8 @@ services:
      - "2889:8889"
     image: "$FGAPISERVER_IMG"
     volumes:
-     - fgvolume_${FGINSTANCE_NAME}_iosandbox:\${FGAPISRV_IOSANDBOX}
-     - fgvolume_${FGINSTANCE_NAME}_appsdir:\${FGAPISRV_APPSDIR}
+     - fgvolume_${FGINSTANCE_NAME}_iosandbox:${FGAPISRV_IOSANDBOX}
+     - fgvolume_${FGINSTANCE_NAME}_appsdir:${FGAPISRV_APPSDIR}
     networks:
      - fg_${FGINSTANCE_NAME}_network
     env_file:
@@ -169,7 +172,7 @@ services:
     networks:
      - fg_${FGINSTANCE_NAME}_network
     volumes:
-      - fgvolume_${FGINSTANCE_NAME}_iosandbox:\${FGAPISRV_IOSANDBOX}
+      - fgvolume_${FGINSTANCE_NAME}_iosandbox:${FGAPISRV_IOSANDBOX}
     env_file:
       - ${FGINSTANCE_ENVF}
 
