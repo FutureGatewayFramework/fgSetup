@@ -10,7 +10,7 @@ ENV TEST_USER=fgtest\
     FG_USER=futuregateway\
     FG_DIR=/home/futuregateway\
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup\
-    FGSETUP_BRANCH=master
+    FGSETUP_BRANCH=user_data
 
 # Package Installation and TeSS cloning
 RUN  adduser --home $TEST_DIR --disabled-password --gecos "" $TEST_USER &&\
