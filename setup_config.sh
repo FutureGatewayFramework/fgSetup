@@ -52,8 +52,8 @@ FGDB_USER=fgapiserver                # Database username
 FGDB_PASSWD=fgapiserver_password     # Database username password
 FGDB_SSHPORT=22                      # Database ssh port number
 FGDB_GITREPO=fgAPIServer             # Database Git repository name
-FGDB_GITTAG="master"                 # Database Git repository tag/branch name
-FGDB_VER=0.0.12b                     # Database schema version
+FGDB_GITTAG="user_data"              # Database Git repository tag/branch name
+FGDB_VER=0.0.13                      # Database schema version
 
 # API server front-end
 #
@@ -97,7 +97,7 @@ FGAPISERVER_PORT=8888                   # fgAPIServer port number (no WSGI)
 FGAPISERVER_SSHPORT=22                  # fgAPIServer ssh port number
 FGAPISERVER_WSGI=1                      # 0 turn off WSGI configuration (apache)
 FGAPISERVER_GITREPO=fgAPIServer         # fgAPIServer Git repository name
-FGAPISERVER_GITTAG="master"             # fgAPIServer Git repository tag/branch name
+FGAPISERVER_GITTAG="user_data"          # fgAPIServer Git repository tag/branch name
 FGAPISERVER_IOPATH=/tmp                 # fgAPIServer I/O sandbox directory
 FGAPISERVER_APIVER=v1.0                 # FutureGateway API version implemented
 FGAPISERVER_LOGCFG=fgapiserver_log.conf # API Server log configuration file
@@ -177,7 +177,7 @@ APISERVERDAEMON_HOSTUNAME=futuregateway # APIServerDaemon host username
 APISERVERDAEMON_PORT=8080               # APIServerDaemon port number
 APISERVERDAEMON_SSHPORT=22              # APIServerDaemon SSH port number
 APISERVERDAEMON_GITREPO=APIServerDaemon # fgAPIServer Git repository name
-APISERVERDAEMON_GITTAG="master"         # fgAPIServer Git repository tag/branch name
+APISERVERDAEMON_GITTAG="user_data"      # fgAPIServer Git repository tag/branch name
 
 # Tomcat user
 TOMCAT_USER=tomcat_user              # Tomcat username
