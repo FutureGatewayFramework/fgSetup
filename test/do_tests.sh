@@ -96,7 +96,7 @@ do_test() {
     else
       out "failed" 0 1
       out "Test command:"
-      cat $TEST_CMD
+      cat tests/$TEST_CMD
       out "Test output:"
       cat $TEST_OUT
       out "Test error:"
@@ -140,12 +140,17 @@ TESTS=(\
   #
   post_user_data
   get_user_data
+  patch_user_data
+  delete_user_data
 
   #
   # APIServerDaemon
   #
 )
 for t in ${TESTS[@]}; do
-  do_test $t || exit 1
+  do_test $t
+  RES=$?
+  [ $RES -ne 0 ] &&\
+    echo "Error on test: '$t'" &&\
+    break
 done
-

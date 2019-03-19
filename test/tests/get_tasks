@@ -3,4 +3,8 @@ TEST_NAME="Get tasks"
 TEST_CASE="get_tasks"
 TEST_DESC="Get the list of tasks"
 
-curl -s -H "Authorization: Bearer $TKN" http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/tasks
+curl -s -f --show-error\
+     -H "Authorization: Bearer $TKN"\
+     http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/tasks
+RES=$?
+exit $RES

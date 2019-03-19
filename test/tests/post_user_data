@@ -1,6 +1,6 @@
 source tests/test_env
 TEST_NAME="API: /users/<user>/data (POST)"
-TEST_CASE="user_data"
+TEST_CASE="post_user_data"
 TEST_DESC="Insert user data records"
 
 USER_DATA=$(mktemp)
@@ -24,10 +24,12 @@ cat > $USER_DATA <<EOF
       "data_type": "TEST_DATA_TYPE_3"}]
 }
 EOF
-curl -s\
+curl -s -f --show-error\ 
      -H "Content-type: Application/json"\
      -H "Authorization: Bearer $TKN"\
      -X POST\
      -d @$USER_DATA\
      http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/users/futuregateway/data
+RES=$?
 rm -f $USER_DATA
+exit $RES
