@@ -3,7 +3,7 @@ TEST_NAME="PTV checktoken"
 TEST_CASE="ptv_checktoken"
 TEST_DESC="Check the given token using PTV service"
 
-curl -s -f --show-error\
+curl -s -f -S\
      -d token="$TKN"\
      -u "$FGAPISERVER_PTVUSER:$FGAPISERVER_PTVPASS"\
      $FGAPISERVER_PTVENDPOINT

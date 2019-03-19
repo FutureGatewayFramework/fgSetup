@@ -1,0 +1,23 @@
+source tests/test_env
+TEST_NAME="API: /users/<user>/data/<name> (PATCH)"
+TEST_CASE="patch_user_data_name"
+TEST_DESC="Modify user data record with name"
+
+USER_DATA=$(mktemp)
+cat >$USER_DATA <<EOF
+{
+  "data_value": "TEST_DATA_VALUE_CHANGE",
+  "data_desc": "TEST_DATA_DESCRIPTION_CHANGE",
+  "data_proto": "TEST_DATA_PROTO_CHANGE",
+  "data_type": "TEST_DATA_TYPE_CHANGE"
+}
+EOF
+curl -s -f -S\
+     -H "Content-type: Application/json"\
+     -H "Authorization: Bearer $TKN"\
+     -d @$USER_DATA\
+     -X PATCH\
+     http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/users/futuregateway/data/TEST_DATA_NAME
+RES=$?
+rm -f $USER_DATA
+exit $RES

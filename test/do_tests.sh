@@ -142,6 +142,10 @@ TESTS=(\
   get_user_data
   patch_user_data
   delete_user_data
+  post_user_data_name
+  get_user_data_name
+  patch_user_data_name
+  delete_user_data_name
 
   #
   # APIServerDaemon

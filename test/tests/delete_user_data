@@ -13,7 +13,7 @@ cat >$USER_DATA <<EOF
 	]
 }
 EOF
-curl -s -f --show-error\ 
+curl -s -f -S\
      -H "Content-type: Application/json"\
      -H "Authorization: Bearer $TKN"\
      -d @$USER_DATA\
