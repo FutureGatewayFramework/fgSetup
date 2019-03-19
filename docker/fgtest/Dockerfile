@@ -8,7 +8,7 @@ MAINTAINER Riccardo Bruno <riccardo.bruno@ct.infn.it>
 ENV TEST_USER=fgtest\
     TEST_DIR=/home/fgtest\
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup\
-    FGSETUP_BRANCH=master
+    FGSETUP_BRANCH=user_data
 
 # User and working directory
 WORKDIR $TEST_DIR

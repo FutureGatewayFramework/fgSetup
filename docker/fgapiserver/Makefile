@@ -14,8 +14,6 @@ FG_APISRVVOLNAME = fg_apiserver_test
 FG_APPSDIRVOLNAME = fg_apps_test
 FG_IOSNDBXVOLNAME = fg_iosandbox_test
 FGAPISRV_IOSANDBOX = /app/fgiosandbox
-FG_APISERVERGIT = https://github.com/FutureGatewayFramework/fgAPIServer.git
-FG_APISERVERGITBRANCH = master
 
 default:
 	@echo "Usage: make <image|pubimg>"

@@ -38,7 +38,7 @@ cat >$FGINSTANCE_ENVF <<EOF
 FG_USER=futuregateway
 FG_DIR=/home/futuregateway
 # FutureGateway Setup
-FGSETUP_BRANCH=master
+FGSETUP_BRANCH=user_data
 FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git
 FGDB_IMG=$FGDB_IMG
 FGAPISERVER_IMG=$FGAPISERVER_IMG
@@ -64,7 +64,7 @@ MYSQL_USER=$FGDB_USER
 #
 # fgAPIServer
 #
-FGAPISERVER_BRANCH=master
+FGAPISERVER_BRANCH=user_data
 FGAPISERVER_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git
 # fgAPIServer configuration settings
 FGAPIVER=v1.0
@@ -77,7 +77,7 @@ FGAPISRV_DB_NAME=$FGDB_NAME
 FGAPISRV_DB_PASS=$FGDB_PASSWD
 FGAPISRV_DB_PORT=$FGDB_PORT
 FGAPISRV_DB_USER=$FGDB_USER
-FGAPISRV_DBVER=0.0.12b
+FGAPISRV_DBVER=0.0.13
 FGAPISRV_DEBUG=True
 FGAPISRV_GEAPPID=10000
 FGAPISRV_HOST=0.0.0.0
@@ -101,7 +101,7 @@ PTV_HSTPRT=fgapiserver:$PTV_PORT
 #
 # APIServerDaemon
 #
-FGASD_BRANCH=master
+FGASD_BRANCH=user_data
 FGASD_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git
 TOMCAT_PASSWORD=$ASD_TOMCAT_PASSWORD
 TOMCAT_USER=$ASD_TOMCAT_USER

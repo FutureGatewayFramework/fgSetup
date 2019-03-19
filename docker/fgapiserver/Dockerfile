@@ -9,7 +9,7 @@ ENV FG_USER=futuregateway\
  FG_DIR=/home/futuregateway\
  FGAPISRV_APPSDIR=/app/apps\
  FGAPISERVER_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git\
- FGAPISERVER_BRANCH=master\
+ FGAPISERVER_BRANCH=user_data\
 # Environment for fgdb
  MYSQL_ROOT_PASSWORD=rpass\
  FGDB_HOST=fgdb\
@@ -25,7 +25,7 @@ ENV FG_USER=futuregateway\
  UTDB_DATABASE=userstracking\
 # Environment for scripts
  FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git\
- FGSETUP_BRANCH=master\
+ FGSETUP_BRANCH=user_data\
 # Environment for fgAPIServer configuration
  FGAPIVER=v1.0\
  FGAPISERVER_NAME='API Server'\
@@ -39,7 +39,7 @@ ENV FG_USER=futuregateway\
  FGAPISRV_KEY=''\
  FGAPISRV_CRT=''\
  FGAPISRV_LOGCFG=fgapiserver_log.conf\
- FGAPISRV_DBVER=0.0.12b\
+ FGAPISRV_DBVER=0.0.13\
  FGAPISRV_SECRET=0123456789ABCDEF\
  FGAPISRV_NOTOKEN=False\
  FGAPISRV_NOTOKENUSR=test\
@@ -81,17 +81,6 @@ WORKDIR $FG_DIR
 
 # Getting FG repo
 RUN git clone $FGAPISERVER_GIT -b $FGAPISERVER_BRANCH
-
-# Use below commands for local testing
-#RUN rm -rf fgAPIServer/fgapiserver.py
-#RUN rm -rf fgAPIServer/requirements.txt
-#ADD fgapiserver.py fgAPIServer/fgapiserver.py
-#ADD client_secrets.json fgAPIServer/client_secrets.json
-#ADD requirements.txt fgAPIServer/requirements.txt
-#ADD cert.pem fgAPIServer/cert.pem
-#ADD key.pem fgAPIServer/key.pem
-#ADD fgapiserver.conf fgAPIServer/fgapiserver.conf
-
 
 # FutureGateway scripts
 RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\

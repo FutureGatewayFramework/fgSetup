@@ -13,13 +13,13 @@ ENV FG_USER=futuregateway\
     MYSQL_PASSWORD=fgapiserver_password\
     MYSQL_DATABASE=fgapiserver\
     FGDB_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git\
-    FGDB_BRANCH=master\
+    FGDB_BRANCH=user_data\
     TOMCAT_USER=tomcat\
     TOMCAT_PASSWORD=tomcat__pass\
     FGAPISRV_IOSANDBOX=/app/fgiosandbox\
 # Environment for scripts
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git\
-    FGSETUP_BRANCH=master\
+    FGSETUP_BRANCH=user_data\
 # Environment for fgdb
     MYSQL_ROOT_PASSWORD=rpass\
     FGDB_HOST=fgdb\
