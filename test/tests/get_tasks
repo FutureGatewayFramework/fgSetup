@@ -1,0 +1,6 @@
+source tests/test_env
+TEST_NAME="Get tasks"
+TEST_CASE="get_tasks"
+TEST_DESC="Get the list of tasks"
+
+curl -s -H "Authorization: Bearer $TKN" http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/tasks
