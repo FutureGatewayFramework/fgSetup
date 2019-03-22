@@ -191,4 +191,4 @@ networks:
  fg_${FGINSTANCE_NAME}_network:
 EOF
 echo "FutureGateway docker compose file: '$FGINSTANCE_CMPF' created"
-echo "To instantiate the FutureGateway execute: docker-compose up -d"
+echo "To instantiate the FutureGateway execute: 'docker-compose up -d'"
