@@ -38,7 +38,7 @@ cat >$FGINSTANCE_ENVF <<EOF
 FG_USER=futuregateway
 FG_DIR=/home/futuregateway
 # FutureGateway Setup
-FGSETUP_BRANCH=user_data
+FGSETUP_BRANCH=py2py3
 FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git
 FGDB_IMG=$FGDB_IMG
 FGAPISERVER_IMG=$FGAPISERVER_IMG
@@ -64,7 +64,7 @@ MYSQL_USER=$FGDB_USER
 #
 # fgAPIServer
 #
-FGAPISERVER_BRANCH=user_data
+FGAPISERVER_BRANCH=py2py3
 FGAPISERVER_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git
 # fgAPIServer configuration settings
 FGAPIVER=v1.0
