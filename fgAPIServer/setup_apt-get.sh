@@ -255,8 +255,8 @@ sed -i'' "s/  fgapisrv_debug.*/  fgapisrv_debug: $FGAPISERVER_DEBUG/" fgapiserve
 sed -i'' "s/  fgapisrv_iosandbox.*/  fgapisrv_iosandbox: $FGAPISERVER_IOPATH/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_geappid.*/  fgapisrv_geappid: $UTDB_FGAPPI/" fgapiserver.yaml &&\
 sed -i'' "s/  fgjson_indent.*/  fgjson_indent: $FGAPISERVER_JSONINDENT/" fgapiserver.yaml &&\
-sed -i'' "s/  fgapisrv_key.*/  fgapisrv_key: '$FGAPISERVER_KEY'/" fgapiserver.yaml &&\
-sed -i'' "s/  fgapisrv_crt.*/  fgapisrv_crt: '$FGAPISERVER_CRT'/" fgapiserver.yaml &&\
+sed -i'' "s/  fgapisrv_key.*/  fgapisrv_key: $FGAPISERVER_KEY/" fgapiserver.yaml &&\
+sed -i'' "s/  fgapisrv_crt.*/  fgapisrv_crt: $FGAPISERVER_CRT/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_logcfg.*/  fgapisrv_logcfg: $FGAPISERVER_LOGCFG/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_dbver.*/  fgapisrv_dbver: $ASDBVER/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_secret.*/  fgapisrv_secret: $FGAPISRV_SECRET/" fgapiserver.yaml &&\
