@@ -108,7 +108,7 @@ out "Preparing the environment ..."
 # Python virtualenv and dependencies
 cd fgAPIServer
 out "Installing python virtualenv and dependencies ..." 1
-CMD="sudo pip install --upgrade pip virtualenv && RES=0"
+CMD="sudo pip install --upgrade pip virtualenv"
 exec_cmd "Unable to install python virtualenv"
 
 # Install requirements in virtual environment
