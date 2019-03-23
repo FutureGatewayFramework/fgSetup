@@ -7,4 +7,4 @@ curl -s -f -S\
      -H "Authorization: Bearer $TKN"\
      http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/users/futuregateway/data
 RES=$?
-return $RES
+exit $RES
