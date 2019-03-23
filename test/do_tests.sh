@@ -110,6 +110,7 @@ do_test() {
 #
 # Test cases, below:
 #
+cd fgSetup/test
 out "Starting testing"
 out "Common environment file: '$TEST_ENV'"
 cat >$TEST_ENV <<EOF
@@ -158,3 +159,4 @@ for t in ${TESTS[@]}; do
     echo "Error on test: '$t'" &&\
     break
 done
+out "Tests completed successfully,  details aviable at: fgSetup/test/.tests"
