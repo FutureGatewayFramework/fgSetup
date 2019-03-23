@@ -12,8 +12,8 @@ ENV FG_USER=futuregateway\
     MYSQL_USER=fgapiserver\
     MYSQL_PASSWORD=fgapiserver_password\
     MYSQL_DATABASE=fgapiserver\
-    FGDB_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git\
-    FGDB_BRANCH=py2py3\
+    FGASD_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git\
+    FGASD_BRANCH=py2py3\
     TOMCAT_USER=tomcat\
     TOMCAT_PASSWORD=tomcat__pass\
     FGAPISRV_IOSANDBOX=/app/fgiosandbox\
@@ -90,7 +90,7 @@ USER $FG_USER
 WORKDIR $FG_DIR
 
 # Getting FG repo and setup properties files
-RUN git clone $FGDB_GIT -b $FGDB_BRANCH &&\
+RUN git clone $FGASD_GIT -b $FGASD_BRANCH &&\
     sed -i "s/apisrv_dbhost\ =\ localhost/apisrv_dbhost\ =\ $FGDB_HOST/"\
         APIServerDaemon/web/WEB-INF/classes/it/infn/ct/APIServerDaemon.properties &&\
     sed -i "s/utdb_host\ =\ localhost/utdb_host\ =\ $FGDB_HOST/"\
