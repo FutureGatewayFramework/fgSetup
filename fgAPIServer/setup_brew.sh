@@ -254,23 +254,33 @@ EOF
    # Now configure fgAPIServer accordingly to configuration settings
    out "Configuring fgAPIServer ... " 1
    cd $HOME/$FGAPISERVER_GITREPO
-   replace_line fgapiserver.conf "fgapisrv_host" "fgapisrv_host = \"$FGAPISERVER_APPHOST\""
-   replace_line fgapiserver.conf "fgapisrv_debug" "fgapisrv_debug = \"$FGAPISERVER_DEBUG\""
-   replace_line fgapiserver.conf "fgapisrv_port" "fgapisrv_port = \"$FGAPISERVER_PORT\""
-   replace_line fgapiserver.conf "fgapisrv_iosandbox" "fgapisrv_iosandbox = \"$FGAPISERVER_IOPATH\""
-   replace_line fgapiserver.conf "fgapisrv_db_port" "fgapisrv_db_port = \"$FGDB_PORT\""
-   replace_line fgapiserver.conf "fgapisrv_db_pass" "fgapisrv_db_pass = \"$FGDB_PASSWD\""
-   replace_line fgapiserver.conf "fgapisrv_db_host" "fgapisrv_db_host = \"$FGDB_HOST\""
-   replace_line fgapiserver.conf "fgapisrv_db_name" "fgapisrv_db_name = \"$FGDB_HOST\""
-   replace_line fgapiserver.conf "fgapisrv_dbver" "fgapisrv_dbver = \"$ASDBVER\""
-   replace_line fgapiserver.conf "fgapisrv_geappid" "fgapisrv_geappid = \"$UTDB_FGAPPID\""
-   replace_line fgapiserver.conf "fgapiver" "fgapiver = \"$FGAPISERVER_APIVER\""
-   replace_line fgapiserver.conf "fgapisrv_notoken" "fgapisrv_notoken = \"$FGAPISERVER_NOTOKEN\""
-   replace_line fgapiserver.conf "fgapisrv_lnkptvflag" "fgapisrv_lnkptvflag = \"$FGAPISERVER_PTVFLAG\""
-   replace_line fgapiserver.conf "fgapisrv_ptvendpoint" "fgapisrv_ptvendpoint = \"$FGAPISERVER_PTVENDPOINT\""
-   replace_line fgapiserver.conf "fgapisrv_ptvmapfile" "fgapisrv_ptvmapfile = \"$FGAPISERVER_PTVMAPFILE\""
-   replace_line fgapiserver.conf "fgapisrv_ptvuser" "fgapisrv_ptvuser = \"$FGAPISERVER_PTVUSER\""
-   replace_line fgapiserver.conf "fgapisrv_ptvpass" "fgapisrv_ptvpass = \"$FGAPISERVER_PTVPASS\""
+   sed -i'' "s/  fgapiver.*/  fgapiver: $FGAPISERVER_APIVER/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapiserver_name.*/  fgapiserver_name: $FGAPISERVER_NAME/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_host.*/  fgapisrv_host: $FGAPISERVER_APPHOST/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_port.*/  fgapisrv_port: $FGAPISERVER_PORT/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_debug.*/  fgapisrv_debug: $FGAPISERVER_DEBUG/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_iosandbox.*/  fgapisrv_iosandbox: $FGAPISERVER_IOPATH/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_geappid.*/  fgapisrv_geappid: $UTDB_FGAPPI/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgjson_indent.*/  fgjson_indent: $FGAPISERVER_JSONINDENT/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_key.*/  fgapisrv_key: $FGAPISERVER_KEY/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_crt.*/  fgapisrv_crt: $FGAPISERVER_CRT/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_logcfg.*/  fgapisrv_logcfg: $FGAPISERVER_LOGCFG/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_dbver.*/  fgapisrv_dbver: $ASDBVER/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_secret.*/  fgapisrv_secret: $FGAPISRV_SECRET/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_notoken\ .*/  fgapisrv_notoken: $FGAPISRV_NOTOKEN/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_notokenusr.*/  fgapisrv_notokenusr: $FGAPISRV_NOTOKENUSR/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_lnkptvflag.*/  fgapisrv_lnkptvflag: $FGAPISERVER_PTVFLAG/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_ptvendpoint.*/  fgapisrv_ptvendpoint: $FGAPISERVER_PTVENDPOINT/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_ptvuser.*/  fgapisrv_ptvuser: $FGAPISERVER_PTVUSER/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_ptvpass.*/  fgapisrv_ptvpass: $FGAPISERVER_PTVPASS/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_ptvdefusr.*/  fgapisrv_ptvdefusr: $FGAPISERVER_PTVDEFUSR/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_ptvdefgrp.*/  fgapisrv_ptvdefgrp: $FGAPISERVER_PTVDEFGRP/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_ptvmapfile.*/  fgapisrv_ptvmapfile: $FGAPISERVER_PTVMAPFILE/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_db_host.*/  fgapisrv_db_host: $FGDB_HOST/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_db_port.*/  fgapisrv_db_port: $FGDB_PORT/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_db_user.*/  fgapisrv_db_user: $FGDB_USER/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_db_pass.*/  fgapisrv_db_pass: $FGDB_PASSWD/" fgapiserver.yaml &&\
+   sed -i'' "s/  fgapisrv_db_name.*/  fgapisrv_db_name: $FGDB_NAME/" fgapiserver.yaml &&\
    cd - 2>/dev/null >/dev/null
    out "done" 0 1
 fi

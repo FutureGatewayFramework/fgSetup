@@ -373,12 +373,14 @@ out "done" 0 1
 
 # APIServerDaemon
 cd $APISERVERDAEMON_GITREPO
-ant all || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
+mvn install || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
+
+# Verify compilation
 out "Verify APIServerDaemon components compilation ... " 1
 CMD="[ \"\$MISSING_COMPILATION\" = \"\" ]"
 exec_cmd "Following APIServerDaemon components failed to compile: \"$MISSING_COMPILATION\"" "" "missing component: \"$MISSING_COMPILATION\""
 out "Installing APIServerDaemon.war" 1
-CMD="[ -f dist/${APISERVERDAEMON_GITREPO}.war ] &&\
+CMD="[ -f target/${APISERVERDAEMON_GITREPO}.war ] &&\
      sudo cp dist/${APISERVERDAEMON_GITREPO}.war $CATALINA_HOME/webapps/"
 exec_cmd "Unable to install APIServerDaemon.war file" 
 cd - 2>&1 >/dev/null

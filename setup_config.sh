@@ -81,11 +81,14 @@ FGAPISERVER_VARS="FGAPISERVER_SETUP\
                   FGAPISERVER_JSONINDENT\
                   FGAPISERVER_DEBUG\
                   FGAPISERVER_NOTOKEN\
+                  FGAPISERVER_NOTOKENUSR\
                   FGAPISERVER_PTVFLAG\
                   FGAPISERVER_PTVENDPOINT\
                   FGAPISERVER_PTVMAPFILE\
                   FGAPISERVER_PTVUSER\
                   FGAPISERVER_PTVPASS\
+                  FGAPISERVER_PTVDEFUSR\
+                  FGAPISERVER_PTVDEFGRP\
                   FGAPISERVER_CRT\
                   FGAPISERVER_KEY"
 FGAPISERVER_SETUP=1                     # Enable this flag to setup fgAPIServer
@@ -97,20 +100,23 @@ FGAPISERVER_PORT=8888                   # fgAPIServer port number (no WSGI)
 FGAPISERVER_SSHPORT=22                  # fgAPIServer ssh port number
 FGAPISERVER_WSGI=1                      # 0 turn off WSGI configuration (apache)
 FGAPISERVER_GITREPO=fgAPIServer         # fgAPIServer Git repository name
-FGAPISERVER_GITTAG="user_data"          # fgAPIServer Git repository tag/branch name
+FGAPISERVER_GITTAG="py2py3"             # fgAPIServer Git repository tag/branch name
 FGAPISERVER_IOPATH=/tmp                 # fgAPIServer I/O sandbox directory
 FGAPISERVER_APIVER=v1.0                 # FutureGateway API version implemented
 FGAPISERVER_LOGCFG=fgapiserver_log.conf # API Server log configuration file
 FGAPISERVER_JSONINDENT=4                # API json output indentation
 FGAPISERVER_DEBUG=True                  # Enable/Disable fgAPIServer debug mode
 FGAPISERVER_NOTOKEN=False               # Enable/Disable token mechanism
+FGAPISERVER_NOTOKENUSR=futuregateway    # Selected user when NOTOKEN flag is true
 FGAPISERVER_PTVFLAG=True                # Enable/Disable PTV (token mode on)
 FGAPISERVER_PTVUSER="tokenver_user"     # PTV HTTP access service username
 FGAPISERVER_PTVPASS="tokenver_pass"     # PTV HTTP service password
+FGAPISERVER_PTVDEFUSR=futuregateway     # Default user in PTV mapping
+FGAPISERVER_PTVDEFGRP=administrator     # Default group in PTV mapping
 FGAPISERVER_PTVENDPOINT="http://$FGAPISERVER_HOST:8889/checktoken" 
 FGAPISERVER_PTVMAPFILE="fgapiserver_ptvmap.json"
-FGAPISERVER_CRT=
-FGAPISERVER_KEY=
+FGAPISERVER_CRT=                        # Host certificate file
+FGAPISERVER_KEY=                        # Host certificate key file
 
 # APIServer
 #
@@ -177,7 +183,7 @@ APISERVERDAEMON_HOSTUNAME=futuregateway # APIServerDaemon host username
 APISERVERDAEMON_PORT=8080               # APIServerDaemon port number
 APISERVERDAEMON_SSHPORT=22              # APIServerDaemon SSH port number
 APISERVERDAEMON_GITREPO=APIServerDaemon # fgAPIServer Git repository name
-APISERVERDAEMON_GITTAG="user_data"      # fgAPIServer Git repository tag/branch name
+APISERVERDAEMON_GITTAG="py2py3"         # fgAPIServer Git repository tag/branch name
 
 # Tomcat user
 TOMCAT_USER=tomcat_user              # Tomcat username
