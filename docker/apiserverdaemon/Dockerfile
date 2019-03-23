@@ -13,13 +13,13 @@ ENV FG_USER=futuregateway\
     MYSQL_PASSWORD=fgapiserver_password\
     MYSQL_DATABASE=fgapiserver\
     FGDB_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git\
-    FGDB_BRANCH=user_data\
+    FGDB_BRANCH=py2py3\
     TOMCAT_USER=tomcat\
     TOMCAT_PASSWORD=tomcat__pass\
     FGAPISRV_IOSANDBOX=/app/fgiosandbox\
 # Environment for scripts
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git\
-    FGSETUP_BRANCH=user_data\
+    FGSETUP_BRANCH=py2py3\
 # Environment for fgdb
     MYSQL_ROOT_PASSWORD=rpass\
     FGDB_HOST=fgdb\
@@ -221,12 +221,14 @@ RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
 #
 # Build APIServerDaemon WAR
 #
-RUN cd APIServerDaemon && mkdir -p web/WEB-INF/lib && ant all
+RUN cd APIServerDaemon &&\
+    mvn install &&\
+    cp target/APIServerDaemon.war $CATALINA_HOME/webapps
 
 # nginx port 80 available to the world outside this container
 EXPOSE 8080
 
 # Back to the root user, load the environment and place  APIServerDaemon webapp
-USER root 
-RUN cp /home/$FG_USER/APIServerDaemon/dist/APIServerDaemon.war $CATALINA_HOME/webapps/
+#USER root 
+#RUN cp /home/$FG_USER/APIServerDaemon/dist/APIServerDaemon.war $CATALINA_HOME/webapps/
 

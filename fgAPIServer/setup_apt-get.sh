@@ -122,8 +122,6 @@ CMD="RES=1 &&\
 exec_cmd "Unable to install python requirements"
 cd - 2>/dev/null >/dev/null
 
-# Take care of config values to setup fgapiserver.conf properly
-   
 # WSGI or screen configuration
 if [ $FGAPISERVER_WSGI -ne 0 ]; then
     out "Configuring fgAPIServer for wsgi ..."
@@ -248,7 +246,7 @@ out "User profile successfully created"
 out "Configuring fgAPIServer ... " 1
 cd $HOME/$FGAPISERVER_GITREPO
 get_ts
-cp fgapiserver.conf fgapiserver.conf_$TS
+cp fgapiserver.yaml fgapiserver.yaml_$TS
 sed -i'' "s/  fgapiver.*/  fgapiver: $FGAPISERVER_APIVER/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapiserver_name.*/  fgapiserver_name: $FGAPISERVER_NAME/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_host.*/  fgapisrv_host: $FGAPISERVER_APPHOST/" fgapiserver.yaml &&\
