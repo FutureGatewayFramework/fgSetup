@@ -229,6 +229,5 @@ RUN cd APIServerDaemon &&\
 EXPOSE 8080
 
 # Back to the root user, load the environment and place  APIServerDaemon webapp
-#USER root 
-#RUN cp /home/$FG_USER/APIServerDaemon/dist/APIServerDaemon.war $CATALINA_HOME/webapps/
+USER root 
 
