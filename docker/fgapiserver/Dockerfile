@@ -153,7 +153,8 @@ RUN ln -s fgapiserver.py main.py &&\
     sed -i'' "s/  fgapisrv_db_pass.*/  fgapisrv_db_pass: $FGAPISRV_DB_PASS/" fgapiserver.yaml &&\
     sed -i'' "s/  fgapisrv_db_name.*/  fgapisrv_db_name: $FGAPISRV_DB_NAME/" fgapiserver.yaml &&\
     cat fgapiserver.yaml &&\
-    cp /app_orig/uwsgi.ini uwsgi.ini &&\
+    echo "[uwsgi]" > uwsgi.ini &&\
+    echo "wsgi-file = fgapiserver.wsgi" >> uwsgi.ini &&\
     pip install -r requirements.txt
 
 # Test purposes, execute PTV and TOSCA simulator

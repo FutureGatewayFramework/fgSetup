@@ -25,7 +25,11 @@ default:
 	#@echo "Tagged image: $(IMAGE_TAG) - $(IMAGE_TAGGED_ID)"	
 
 image: Dockerfile
-	docker build --no-cache  -t $(DOCKER_REPO)/$(IMAGE_NAME):latest .
+ifdef nocache
+	docker build --no-cache -t $(DOCKER_REPO)/$(IMAGE_NAME):latest .
+else
+	docker build -t $(DOCKER_REPO)/$(IMAGE_NAME):latest .
+endif
 	docker tag $(DOCKER_REPO)/$(IMAGE_NAME):latest $(DOCKER_REPO)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 publish: image 

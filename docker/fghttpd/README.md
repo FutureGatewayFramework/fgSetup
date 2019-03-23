@@ -51,4 +51,8 @@ In this section it is possible to point the source code extraction to a particul
 * `FG_LIFERAY_PROXYPATH` published endpoint for liferay portal
 * `FG_LIFERAY_PROXY` ajp address for liferay portal
 
+## SSL Certificates
+To build self signed certificates, it is possible to generate them accordingly to these [instructions][AKADIA].
 
+
+[AKADIA]: <https://www.akadia.com/services/ssh_test_certificate.html>

@@ -8,7 +8,7 @@ MAINTAINER Riccardo Bruno <riccardo.bruno@ct.infn.it>
 ENV TEST_USER=fgtest\
     TEST_DIR=/home/fgtest\
     FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup\
-    FGSETUP_BRANCH=user_data
+    FGSETUP_BRANCH=py2py3
 
 # User and working directory
 WORKDIR $TEST_DIR
@@ -37,11 +37,6 @@ RUN adduser --disabled-password --gecos "" $TEST_USER &&\
              python-dev\
              python-pip &&\
     sudo echo "$TEST_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers &&\
-    sudo add-apt-repository -y ppa:fkrull/deadsnakes-python2.7 &&\
-    sudo apt-add-repository -y ppa:ansible/ansible &&\
-    sudo apt-get update -y &&\
-    sudo apt-get upgrade -y --force-yes &&\
-    sudo apt-get install -y ansible &&\
     apt-get clean &&\
     rm -rf /var/lib/apt/lists/*
 
@@ -51,18 +46,11 @@ WORKDIR $TEST_DIR
 
 # Getting FG repo
 RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
-    ansible-galaxy install geerlingguy.git &&\
-    ansible-galaxy install geerlingguy.mysql &&\
-    ansible-galaxy install geerlingguy.apache &&\
-    ansible-galaxy install bobbyrenwick.pip &&\
     echo "StrictHostKeyChecking no\nUserKnownHostsFile=/dev/null\n" > ssh_opt &&\
     sudo su - -c "cat $TEST_DIR/ssh_opt >> /etc/ssh/ssh_config" &&\
     rm -f ssh_opt &&\
-    #cd fgSetup/ansible &&\
-    #cd - &&\
 # SSH keygen
     ssh-keygen -t rsa -N '' -f $TEST_DIR/.ssh/id_rsa &&\
-# Building FG with ansible here
     echo "Done"
 
 
