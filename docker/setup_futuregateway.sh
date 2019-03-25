@@ -101,7 +101,7 @@ PTV_HSTPRT=fgapiserver:$PTV_PORT
 #
 # APIServerDaemon
 #
-FGASD_BRANCH=py2py3
+FGASD_BRANCH=user_data
 FGASD_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git
 TOMCAT_PASSWORD=$ASD_TOMCAT_PASSWORD
 TOMCAT_USER=$ASD_TOMCAT_USER
