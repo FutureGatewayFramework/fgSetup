@@ -373,7 +373,7 @@ out "done" 0 1
 
 # APIServerDaemon
 cd $APISERVERDAEMON_GITREPO
-mvn install || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
+ant all || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
 
 # Verify compilation
 out "Verify APIServerDaemon components compilation ... " 1
