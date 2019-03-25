@@ -18,7 +18,7 @@ ENV FG_USER=futuregateway\
  FGDB_NAME=fgapiserver\
 # Environment for scripts
  FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git\
- FGSETUP_BRANCH=py2py3\
+ FGSETUP_BRANCH=v0.0.10\
 # Environment for GridEngine EI
  UTDB_HOST=$FGDB_HOST\
  UTDB_PORT=3306\

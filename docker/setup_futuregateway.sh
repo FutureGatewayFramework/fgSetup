@@ -38,7 +38,7 @@ cat >$FGINSTANCE_ENVF <<EOF
 FG_USER=futuregateway
 FG_DIR=/home/futuregateway
 # FutureGateway Setup
-FGSETUP_BRANCH=py2py3
+FGSETUP_BRANCH=v0.0.10
 FGSETUP_GIT=https://github.com/FutureGatewayFramework/fgSetup.git
 FGDB_IMG=$FGDB_IMG
 FGAPISERVER_IMG=$FGAPISERVER_IMG
@@ -64,7 +64,7 @@ MYSQL_USER=$FGDB_USER
 #
 # fgAPIServer
 #
-FGAPISERVER_BRANCH=py2py3
+FGAPISERVER_BRANCH=v0.0.10
 FGAPISERVER_GIT=https://github.com/FutureGatewayFramework/fgAPIServer.git
 # fgAPIServer configuration settings
 FGAPIVER=v1.0
@@ -101,7 +101,7 @@ PTV_HSTPRT=fgapiserver:$PTV_PORT
 #
 # APIServerDaemon
 #
-FGASD_BRANCH=user_data
+FGASD_BRANCH=v0.0.10
 FGASD_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git
 TOMCAT_PASSWORD=$ASD_TOMCAT_PASSWORD
 TOMCAT_USER=$ASD_TOMCAT_USER
@@ -118,7 +118,6 @@ UTDB_USER=tracking_user
 GNCENG_ADP_ROCCI_BRANCH=master
 GNCENG_ADP_ROCCI=https://github.com/csgf/jsaga-adaptor-rocci.git
 GNCENG_BRANCH=FutureGateway
-GNCENG_BRANCH=master
 GNCENG=https://github.com/csgf/grid-and-cloud-engine.git
 
 #
