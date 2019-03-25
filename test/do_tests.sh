@@ -24,6 +24,9 @@ TKN="________TEST_TKN________"
   cd - >/dev/null 2>/dev/null &&
   touch .fgsetup ||\
   out "Setup already executed"
+[ ! -f .fgsetup ] &&\
+  echo  "FutureGateway installation unsuccessful" &&\
+  exit 1
 
 # Setup PTV simulator for test running
 PTV=$(sudo su - futuregateway -c "screen -ls | grep ptv")
@@ -110,7 +113,7 @@ do_test() {
 #
 # Test cases, below:
 #
-cd fgSetup/test
+cd $HOME/fgSetup/test
 out "Starting testing"
 out "Common environment file: '$TEST_ENV'"
 cat >$TEST_ENV <<EOF

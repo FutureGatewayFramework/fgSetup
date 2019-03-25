@@ -8,7 +8,7 @@
 #
 DOCKER_REPO = futuregateway
 IMAGE_NAME = fgtest
-IMAGE_TAG = 0.1
+IMAGE_TAG = 0.3
 
 default:
 	@echo "Usage: make <image|pubimg>"
