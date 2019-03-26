@@ -261,8 +261,8 @@ out "done" 0 1
 # APIServerDaemon
 cd $APISERVERDAEMON_GITREPO
 ant all || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
-[ -f target/APIServerDaemon.war/$APISERVERDAEMON_GITREPO.war ] &&\
-  cp target/APIServerDaemon.war/$APISERVERDAEMON_GITREPO.war $CATALINA_HOME/webapps
+[ -f dist/APIServerDaemon.war/$APISERVERDAEMON_GITREPO.war ] &&\
+  cp dist/APIServerDaemon.war/$APISERVERDAEMON_GITREPO.war $CATALINA_HOME/webapps
 cd - 2>&1 >/dev/null
 if [ "$MISSING_COMPILATION" != "" ]; then
   out "ERROR: Following components did not compile successfully: \"$MISSING_COMPILATION\""
