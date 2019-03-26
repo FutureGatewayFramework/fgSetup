@@ -41,9 +41,11 @@ ENV FG_USER=futuregateway\
 
 # FG User creation and packages installation
 RUN adduser --disabled-password --gecos "" $FG_USER &&\
-    chown -R $FG_USER:$FG_USER $FG_DIR &&\
-    apt-get update &&\
-    apt-get install\
+    chown -R $FG_USER:$FG_USER $FG_DIR
+
+RUN apt-get update || echo "apt-get update failed!"
+
+RUN apt-get install\
             -y\
             --no-install-recommends\
             openssh-client\
@@ -112,8 +114,10 @@ RUN git clone $FGASD_GIT -b $FGASD_BRANCH &&\
 #
 
 # GridnCloud Engine Executor Interface
-RUN sudo apt-get update &&\
-    sudo apt-get install -y --no-install-recommends maven &&\
+
+RUN sudo apt-get update || echo "apt-get update failed!"
+
+RUN sudo apt-get install -y --no-install-recommends maven &&\
     sudo apt-get clean
 # JSAGA rOCCI adaptor
 RUN git clone $GNCENG_ADP_ROCCI -b $GNCENG_ADP_ROCCI_BRANCH
