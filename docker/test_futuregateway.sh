@@ -7,6 +7,10 @@
 
 # Tests are done submitting SayHello application, this needs to 
 # This needs to change the setup_app file
+for f in $(find $HOME/.fgprofile -type f); do source $f; done # FGLOADENV
+
+FGHOST=localhost/$FGAPISERVER_APIVER
+
 echo ""
 echo "------------------------------------------"
 echo "Testing FutureGateway core functionalities"
@@ -20,7 +24,7 @@ TKN=$(curl -s\
            -H "Content-type: application/json"\
            -H "Authorization: futuregateway:ZnV0dXJlZ2F0ZXdheQ=="\
            -X POST\
-          localhost/v1.0/auth |\
+          $FGHOST/auth |\
       jq '.token' |\
       xargs echo) &&\
 echo "Session token from credentials: futuregateway/futuregateway: '$TKN'"
@@ -31,8 +35,9 @@ echo "Session token from credentials: futuregateway/futuregateway: '$TKN'"
   exit 1
 
 # Configure TKN in seutp file
+API_URL=$(echo $FGHOST | sed s/\\//\\\\\\//g)
 sed -i "s/<place token here>/$TKN/" setup_app.sh
-sed -i "s/API_URL=.*/API_URL=http:\\/\\/localhost\\/v1.0/" setup_app.sh
+sed -i "s/API_URL=.*/API_URL=$API_URL/" setup_app.sh
 
 # The setup script needs to setup the infrastrucure and retrieve its numeric
 # identifier (INFRA_ID)
@@ -51,7 +56,7 @@ INFRA_ID=$(curl -s\
                       \"description\": \"sshnode test infrastructure\",
                       \"enabled\": true,
                       \"virtual\": false }"\
-                http://localhost/v1.0/infrastructures|\
+                $FGHOST/infrastructures|\
             jq '.id' |\
             xargs echo) &&\
 echo "Installed test infrastructure having id: '$INFRA_ID'"
@@ -69,7 +74,7 @@ sed -i "s/Authorization:\ Bearer/Authorization:\ /" setup_app.sh
 ./setup_app.sh
 
 # Retrieve the application numeric identifier (APP_ID) as last inserted application
-APP_ID=$(curl -H "Authorization: $TKN" http://localhost/v1.0/applications |\
+APP_ID=$(curl -H "Authorization: $TKN" $FGHOST/applications |\
          jq '.applications[].id' |\
          tail -n 1 |\
          xargs echo) &&\
@@ -91,10 +96,10 @@ EOF
 curl -H "Content-Type: application/json"\
      -H "Authorization: $TKN"\
      -X POST\
-     -d @$POST_DATA http://localhost/v1.0/tasks
+     -d @$POST_DATA $FGHOST/tasks
 
 # Get last task_id
-TASK_ID=$(curl -H "Authorization: $TKN" http://localhost/v1.0/tasks |\
+TASK_ID=$(curl -H "Authorization: $TKN" $FGHOST/tasks |\
           jq '.tasks[].id' |\
           xargs -I{} echo "{}" |\
           sort |\
@@ -115,7 +120,7 @@ TASK_STATUS=""
 while [ $CNT -lt $MAXCNT ]; do
     TASK_STATUS=$(curl -s\
                        -H "Authorization: $TKN"\
-                       http://localhost/v1.0/tasks/$TASK_ID |\
+                       $FGHOST/tasks/$TASK_ID |\
                        jq '.status' |\
                        xargs echo) &&\
     echo "Task having id: '$TASK_ID' has status: '$TASK_STATUS'"
@@ -129,14 +134,14 @@ done
 if [ "$TASK_STATUS" = "DONE" ]; then
   OUTPUT_FILES=$(curl -s\
                  -H "Authorization: $TKN"\
-                 http://localhost/v1.0/tasks/$TASK_ID |\
+                 $FGHOST/tasks/$TASK_ID |\
                  jq '.output_files[]' |\
                  jq '.url+"|"+.name' |\
                  xargs echo) &&\
   for of in $OUTPUT_FILES; do\
     URL=$(echo $of | awk -F"|" '{ print $1 }');\
     FNM=$(echo $of | awk -F"|" '{ print $2 }');\
-    curl  -s -H "Authorization: $TKN" "http://localhost/v1.0/$URL" > $FNM;\
+    curl  -s -H "Authorization: $TKN" "$FGHOST/$URL" > $FNM;\
     MSG="# File: '$FNM' #";\
     MSGLN=$(echo $MSG | tr '[:print:]' '#');\
     echo $MSGLN;\
@@ -154,4 +159,4 @@ echo
 echo "-----------------------------------------"
 echo "Submission test successfully accomplished"
 echo "-----------------------------------------"
-echo
+
