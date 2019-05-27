@@ -247,12 +247,14 @@ out "Configuring fgAPIServer ... " 1
 cd $HOME/$FGAPISERVER_GITREPO
 get_ts
 cp fgapiserver.yaml fgapiserver.yaml_$TS
+ESC_FGAPISERVER_IOPATH=$(echo $FGAPISERVER_IOPATH | sed s/\\//\\\\\\//g)
+ESC_FGAPISERVER_PTVENDPOINT=$(echo $FGAPISERVER_PTVENDPOINT | sed s/\\//\\\\\\//g)
 sed -i'' "s/  fgapiver.*/  fgapiver: $FGAPISERVER_APIVER/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapiserver_name.*/  fgapiserver_name: $FGAPISERVER_NAME/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_host.*/  fgapisrv_host: $FGAPISERVER_APPHOST/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_port.*/  fgapisrv_port: $FGAPISERVER_PORT/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_debug.*/  fgapisrv_debug: $FGAPISERVER_DEBUG/" fgapiserver.yaml &&\
-sed -i'' "s/  fgapisrv_iosandbox.*/  fgapisrv_iosandbox: $FGAPISERVER_IOPATH/" fgapiserver.yaml &&\
+sed -i'' "s/  fgapisrv_iosandbox.*/  fgapisrv_iosandbox: $ESC_FGAPISERVER_IOPATH/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_geappid.*/  fgapisrv_geappid: $UTDB_FGAPPI/" fgapiserver.yaml &&\
 sed -i'' "s/  fgjson_indent.*/  fgjson_indent: $FGAPISERVER_JSONINDENT/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_key.*/  fgapisrv_key: $FGAPISERVER_KEY/" fgapiserver.yaml &&\
@@ -263,7 +265,7 @@ sed -i'' "s/  fgapisrv_secret.*/  fgapisrv_secret: $FGAPISRV_SECRET/" fgapiserve
 sed -i'' "s/  fgapisrv_notoken\ .*/  fgapisrv_notoken: $FGAPISRV_NOTOKEN/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_notokenusr.*/  fgapisrv_notokenusr: $FGAPISRV_NOTOKENUSR/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_lnkptvflag.*/  fgapisrv_lnkptvflag: $FGAPISERVER_PTVFLAG/" fgapiserver.yaml &&\
-sed -i'' "s/  fgapisrv_ptvendpoint.*/  fgapisrv_ptvendpoint: $FGAPISERVER_PTVENDPOINT/" fgapiserver.yaml &&\
+sed -i'' "s/  fgapisrv_ptvendpoint.*/  fgapisrv_ptvendpoint: $ESC_FGAPISERVER_PTVENDPOINT/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_ptvuser.*/  fgapisrv_ptvuser: $FGAPISERVER_PTVUSER/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_ptvpass.*/  fgapisrv_ptvpass: $FGAPISERVER_PTVPASS/" fgapiserver.yaml &&\
 sed -i'' "s/  fgapisrv_ptvdefusr.*/  fgapisrv_ptvdefusr: $FGAPISERVER_PTVDEFUSR/" fgapiserver.yaml &&\
