@@ -55,6 +55,16 @@ FGDB_GITREPO=fgAPIServer             # Database Git repository name
 FGDB_GITTAG="user_data"              # Database Git repository tag/branch name
 FGDB_VER=0.0.13                      # Database schema version
 
+# GridnCloud Engine DB settings (GridnCloud Engine EI)
+UTDB_FGAPPID=10000                   # FutureGateway appId in GridnCloud Engine
+UTDB_HOST=127.0.0.1                  # Database server address
+UTDB_HOSTUNAME=futuregateway         # Database host username
+UTDB_PORT=3306                       # Database port number
+UTDB_NAME=userstracking              # Database name
+UTDB_ROOTPWD=                        # Leave it empty for no password
+UTDB_USER=tracking_user              # Database username
+UTDB_PASSWD=usertracking             # Database username password
+
 # API server front-end
 #
 # FutureGateway may have different kind of API front-ends.
@@ -89,6 +99,9 @@ FGAPISERVER_VARS="FGAPISERVER_SETUP\
                   FGAPISERVER_PTVPASS\
                   FGAPISERVER_PTVDEFUSR\
                   FGAPISERVER_PTVDEFGRP\
+                  FGAPISERVER_SECRET\
+                  FGDB_VER\
+                  FGAPISERVER_GEAPPID\
                   FGAPISERVER_CRT\
                   FGAPISERVER_KEY"
 FGAPISERVER_SETUP=1                     # Enable this flag to setup fgAPIServer
@@ -115,8 +128,10 @@ FGAPISERVER_PTVDEFUSR=futuregateway     # Default user in PTV mapping
 FGAPISERVER_PTVDEFGRP=administrator     # Default group in PTV mapping
 FGAPISERVER_PTVENDPOINT="http://$FGAPISERVER_HOST:8889/checktoken" 
 FGAPISERVER_PTVMAPFILE="fgapiserver_ptvmap.json"
-FGAPISERVER_CRT=                        # Host certificate file
-FGAPISERVER_KEY=                        # Host certificate key file
+FGAPISERVER_SECRET=0123456789ABCDEF     # Secret key to encrypt user credentials
+FGAPISERVER_GEAPPID=$UTDB_FGAPPID       # GridEngine Application ID
+FGAPISERVER_CRT=""                      # Host certificate file
+FGAPISERVER_KEY=""                      # Host certificate key file
 
 # APIServer
 #
@@ -184,20 +199,8 @@ APISERVERDAEMON_PORT=8080               # APIServerDaemon port number
 APISERVERDAEMON_SSHPORT=22              # APIServerDaemon SSH port number
 APISERVERDAEMON_GITREPO=APIServerDaemon # fgAPIServer Git repository name
 APISERVERDAEMON_GITTAG="py2py3"         # fgAPIServer Git repository tag/branch name
-
-# Tomcat user
 TOMCAT_USER=tomcat_user              # Tomcat username
 TOMCAT_PASSWORD=tomcat_P@ss          # Tomcat password
-
-# GridnCloud Engine DB settings (GridnCloud Engine EI)
-UTDB_FGAPPID=10000                   # FutureGateway appId in GridnCloud Engine
-UTDB_HOST=127.0.0.1                  # Database server address
-UTDB_HOSTUNAME=futuregateway         # Database host username
-UTDB_PORT=3306                       # Database port number
-UTDB_NAME=userstracking              # Database name
-UTDB_ROOTPWD=                        # Leave it empty for no password
-UTDB_USER=tracking_user              # Database username
-UTDB_PASSWD=usertracking             # Database username password
 
 # Executor Interfaces specific Git configuration
 # The meaning of Git variable names is like in the general GIT configurations
@@ -206,9 +209,9 @@ UTDB_PASSWD=usertracking             # Database username password
 # rOCCI jsaga adaptor (GridnCloud Engine EI)
 ROCCI_GIT_HOST=https://github.com
 ROCCI_GIT_RAWHOST=https://raw.githubusercontent.com
-ROCCI_GIT_REPO=indigo-dc                        
-ROCCI_GIT_BASE=$ROCCI_GIT_HOST/$ROCCI_GIT_REPO              
-ROCCI_GIT_BASERAW=$ROCCI_GIT_RAWHOST/$ROCCI_GIT_REPO        
+ROCCI_GIT_REPO=indigo-dc
+ROCCI_GIT_BASE=$ROCCI_GIT_HOST/$ROCCI_GIT_REPO
+ROCCI_GIT_BASERAW=$ROCCI_GIT_RAWHOST/$ROCCI_GIT_REPO
 ROCCI_GITREPO="jsaga-adaptor-rocci"
 ROCCI_GITTAG="master"
 
@@ -217,7 +220,7 @@ GNCENG_GIT_HOST=https://github.com
 GNCENG_GIT_RAWHOST=https://raw.githubusercontent.com
 GNCENG_GIT_REPO=csgf
 GNCENG_GIT_BASE=$GNCENG_GIT_HOST/$GNCENG_GIT_REPO
-GNCENG_GIT_BASERAW=GNCENG_GIT_BASERAW=$GNCENG_GIT_RAWHOST/$GNCENG_GIT_REPO        
+GNCENG_GIT_BASERAW=GNCENG_GIT_BASERAW=$GNCENG_GIT_RAWHOST/$GNCENG_GIT_REPO
 GNCENG_GITREPO="grid-and-cloud-engine"
 GNCENG_GITTAG="FutureGateway"
 
@@ -232,7 +235,7 @@ APISERVERDAEMON_ASCONTROLLERMAXCOMMANDS=5       # Maximum number of controller c
 APISERVERDAEMON_ASTASKMAXRETRIES=5              # Maximum number of action retries
 APISERVERDAEMON_ASTASKMAXWAIT=1800000           # Delay among two different action retries
 APISERVERDAEMON_UTDB_JNDI=jdbc/UserTrackingPool # JNDI connection pool name
-APISERVERDAEMON_UTDB_HOST=$UTDB_HOST             # UsersTracking database host
+APISERVERDAEMON_UTDB_HOST=$UTDB_HOST            # UsersTracking database host
 APISERVERDAEMON_UTDB_PORT=$UTDB_PORT            # UsersTracking database port
 APISERVERDAEMON_UTDB_USER=$UTDB_USER            # UsersTracking database user
 APISERVERDAEMON_UTDB_PASS=$UTDB_PASSWD          # UsersTracking database password

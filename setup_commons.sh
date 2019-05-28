@@ -251,27 +251,27 @@ setsrvsshvars() {
     
     case $FGCOMPONENT in
         'fgdb')
-            SSH_HOST=$FGDB_HOST       
+            SSH_HOST=$FGDB_HOST
             SSH_USER=$FGDB_HOSTUNAME
             SSH_PORT=$FGDB_SSHPORT
         ;;
         'fgAPIServer')
-            SSH_HOST=$FGAPISERVER_HOST       
+            SSH_HOST=$FGAPISERVER_HOST
             SSH_USER=$FGAPISERVER_APPHOSTUNAME
             SSH_PORT=$FGAPISERVER_SSHPORT
         ;;
         'APIServerDaemon')
-            SSH_HOST=$APISERVERDAEMON_HOST       
+            SSH_HOST=$APISERVERDAEMON_HOST
             SSH_USER=$APISERVERDAEMON_HOSTUNAME
             SSH_PORT=$APISERVERDAEMON_SSHPORT
         ;;
         'Liferay62')
-            SSH_HOST=$FGPORTAL_LIFERAY62_HOST       
+            SSH_HOST=$FGPORTAL_LIFERAY62_HOST
             SSH_USER=$FGPORTAL_LIFERAY62_HOSTUNAME
             SSH_PORT=$FGPORTAL_LIFERAY62_SSHPORT
         ;;
        'Liferay7')
-            SSH_HOST=$FGPORTAL_LIFERAY7_HOST       
+            SSH_HOST=$FGPORTAL_LIFERAY7_HOST
             SSH_USER=$FGPORTAL_LIFERAY7_HOSTUNAME
             SSH_PORT=$FGPORTAL_LIFERAY7_SSHPORT
         ;;
@@ -408,7 +408,7 @@ ssh_getfile() {
     
     # Execute SCP command
     $SCP -P $SSH_PORT $SSH_USER@$SSH_HOST:$SSHDSTFILE $SSHFILE  2>$SSHERR >$SSHOUT 
-	RES=$?
+    RES=$?
 
     return $RES
 }
