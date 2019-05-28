@@ -10,6 +10,8 @@
 for f in $(find $HOME/.fgprofile -type f); do source $f; done # FGLOADENV
 
 FGHOST=localhost/$FGAPISERVER_APIVER
+[ "$TEST_USER" = "" ] && TEST_USER="test"
+[ "$TEST_PASSWORD" = "" ] && TEST_PASSWORD="test"
 
 echo ""
 echo "------------------------------------------"

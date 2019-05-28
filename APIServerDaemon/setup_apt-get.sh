@@ -160,7 +160,7 @@ sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERV
 sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
 sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
 sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
-sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\"" >> \$SERVER_XML &&\
+sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_NAME\\"" >> \$SERVER_XML &&\
 sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
 sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
 sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
@@ -175,7 +175,7 @@ sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERV
 sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
 sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
 sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
-sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_DATABASE\\"" >> \$SERVER_XML &&\
+sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_NAME\\"" >> \$SERVER_XML &&\
 sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
 sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
 sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
@@ -373,6 +373,10 @@ out "done" 0 1
 
 # APIServerDaemon
 cd $APISERVERDAEMON_GITREPO
+mkdir -p src/main/webapp/WEB-INF/lib/
+cp ../$ROCCI_GITREPO/dist/jsaga-adaptor-rocci.jar src/main/webapp/WEB-INF/lib/
+cp ../$GNCENG_GITREPO/grid-and-cloud-engine_M/target/lib/*.jar src/main/webapp/WEB-INF/lib/
+cp ../$GNCENG_GITREPO/grid-and-cloud-engine-threadpool/target/lib/*.jar src/main/webapp/WEB-INF/lib/
 mvn install || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
 
 # Verify compilation

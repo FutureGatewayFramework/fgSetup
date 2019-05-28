@@ -260,6 +260,10 @@ out "done" 0 1
 
 # APIServerDaemon
 cd $APISERVERDAEMON_GITREPO
+mkdir -p src/main/webapp/WEB-INF/lib/
+cp ../$ROCCI_GITREPO/dist/jsaga-adaptor-rocci.jar src/main/webapp/WEB-INF/lib/
+cp ../$GNCENG_GITREPO/grid-and-cloud-engine_M/target/lib/*.jar src/main/webapp/WEB-INF/lib/
+cp ../$GNCENG_GITREPO/grid-and-cloud-engine-threadpool/target/lib/*.jar src/main/webapp/WEB-INF/lib/
 mvn install || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
 [ -f target/APIServerDaemon.war/$APISERVERDAEMON_GITREPO.war ] &&\
   cp target/APIServerDaemon.war/$APISERVERDAEMON_GITREPO.war $CATALINA_HOME/webapps
