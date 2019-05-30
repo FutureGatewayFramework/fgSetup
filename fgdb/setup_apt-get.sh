@@ -79,7 +79,12 @@ out "Looking up mysql version ... " 1
 CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
 exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
     
-#Check connectivity
+#Native mysql native password mode
+out "Setup mysql nativa password mode" 1
+CMD="sudo $MYSQL -u root -e \"use mysql; update user set plugin='mysql_native_password';\""
+exec_cmd "Unable to setup mysql native password mode"  
+
+#Check mysql connectivity
 out "Checking mysql connectivity ... " 1
 CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
 exec_cmd "Missing mysql connectivity"

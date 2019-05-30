@@ -65,8 +65,8 @@ APTPACKAGES=(
   libmysql-java
   ant
   maven
-  tomcat7
-  openjdk-7-jdk
+  default-jdk
+  tomcat8
 )
 CMD="install_apt ${APTPACKAGES[@]}"
 exec_cmd "Error installing required packages"
