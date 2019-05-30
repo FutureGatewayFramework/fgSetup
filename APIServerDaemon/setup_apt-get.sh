@@ -52,6 +52,15 @@ out "Starting FutureGateway APIServerDaemon apt-get versioned setup script"
 # Check for FutureGateway fgAPIServer unix user
 check_and_create_user $FGAPISERVER_APPHOSTUNAME
 
+# Determine Tomcat version
+TOMCATV=$(apt-cache search tomcat |\
+          awk -F"-" '{ print $1 }' |\
+          grep tomcat |\
+          grep -v lib |\
+          sort -u |\
+          tail -n 1|\
+          xargs echo)
+
 # Mandatory packages installation
 out "Installing packages ..." 1
 # Mandatory packages installation
@@ -66,7 +75,7 @@ APTPACKAGES=(
   ant
   maven
   default-jdk
-  tomcat8
+  $TOMCATV
 )
 CMD="install_apt ${APTPACKAGES[@]}"
 exec_cmd "Error installing required packages"
@@ -146,7 +155,7 @@ exec_cmd "Unable to setup mysql-connector" "(\$MYSQL_CONNECTOR)"
 
 out " Configuring GridEngine connection pools" 1
 cat >$CMD_FILE <<EOF
-TOMCAT_CONFDIR=/etc/tomcat7 &&\
+TOMCAT_CONFDIR=/etc/$TOMCATV &&\
 SERVER_XML=\$TOMCAT_CONFDIR/server.xml &&\
 sudo chmod g+x,g+w,o+x,o+w \$TOMCAT_CONFDIR &&
 sudo chmod g+r,g+w,o+r,o+w \$SERVER_XML &&\
@@ -199,8 +208,9 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      sudo mkdir -p \$CATALINA_HOME/common/classes &&\
      sudo mkdir -p \$CATALINA_HOME/server/classes &&\
      sudo mkdir -p \$CATALINA_HOME/shared/classes &&\
-     sudo chown -R tomcat7.tomcat7 /var/log/tomcat7 &&\
-     sudo chown -R tomcat7.tomcat7 /var/lib/tomcat7/logs &&\
+     sudo mkdir -p \$CATALINA_BASE/webapps/ROOT &&\
+     sudo chown -R $TOMCATV.$TOMCATV /var/log/$TOMCATV &&\
+     sudo chown -R $TOMCATV.$TOMCATV /var/lib/$TOMCATV/logs &&\
      sudo mv -n $CATALINA_BASE/webapps/ROOT $CATALINA_HOME/webapps/ &&\
      cd \$CATALINA_HOME/conf &&\
      sudo rm -f tomcat-users.xml &&\
@@ -208,7 +218,7 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      sudo rm -f server.xml &&\
      sudo ln -s \$SERVER_XML server.xml &&\
      cd -"
-exec_cmd "Unable to setup Tomcat7 directories"
+exec_cmd "Unable to setup $TOMCATV directories"
 
 # Do not use service since containers may not accept this way
 # Starting Tomcat using startup script
@@ -258,7 +268,7 @@ OCCI=$(which occi)
 if [ "$OCCI" != "" -a -d /etc/grid-security/vomsdir -a -d /etc/vomses/ ]; then
     out "WARNING: Most probably OCCI client and GSI are already installed; skipping their installation"
 else
-    curl -L http://go.egi.eu/fedcloud.ui | sudo /bin/bash -
+    curl -s -L http://go.egi.eu/fedcloud.ui | sudo /bin/bash -
     # Fix apt list files, otherwise apt will not work anymore
     sudo rm -f /etc/apt/sources.list.d/UMD-3-base.list\
                /etc/apt/sources.list.d/UMD-3-updates.list\

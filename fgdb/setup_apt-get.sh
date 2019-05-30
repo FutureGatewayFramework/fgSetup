@@ -80,8 +80,8 @@ CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2
 exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
     
 #Native mysql native password mode
-out "Setup mysql nativa password mode" 1
-CMD="sudo $MYSQL -u root -e \"use mysql; update user set plugin='mysql_native_password';\""
+out "Setup mysql native password mode ... " 1
+CMD="sudo $MYSQL -u root -e \"use mysql; update user set plugin='mysql_native_password'; flush privileges;\""
 exec_cmd "Unable to setup mysql native password mode"  
 
 #Check mysql connectivity
