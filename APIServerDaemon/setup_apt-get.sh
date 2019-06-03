@@ -90,7 +90,9 @@ CMD="MISSING_PKGS=\"\"; \
      GIT=\$(which git || \$MISSING_PKGS=\$MISSING_PKGS\"git \"); \
      ANT=\$(which ant || \$MISSING_PKGS=\$MISSING_PKGS\"ant \"); \
      MVN=\$(which mvn || \$MISSING_PKGS=\$MISSING_PKGS\"mvn \"); \
-     CATALINA=\$(ls -1 /etc/init.d | grep tomcat || \$MISSING_PKGS=\$MISSING_PKGS\"tomcat \"); \
+     CATALINA=\$(ls -1 /etc/init.d | grep tomcat); \
+     CATALINASYSD=\$(find /etc/systemd/ | grep tomcat); \
+     [ \"\$CATALINA \$CATALINASYSD\" = \"\" ] && \$MISSING_PKGS=\$MISSING_PKGS\"tomcat \"; \
      JAVA=\$(which java || \$MISSING_PKGS=$MISSING_PKGS\"java \"); \
      [ \"\$MISSING_PKGS\" == \"\" ] || echo  \"Missing packages identified: \$MISSING_PKGS\""
 exec_cmd "Following mandatory commands are not present: \"$MISSING_PKGS\"" "(git: \$GIT, ant: \$ANT, mvn: \$MVN, tomcat: \$CATALINA, java: \$JAVA)"
@@ -105,40 +107,64 @@ CMD="JAVA_VER=\$(java -version 2>&1|\
 exec_cmd "Unsupported java version; (>= 1.6.0)" "(java version: \$JAVA_VER)" "(java version: \$JAVA_VER)" 
 
 # Check and configure catalina (Tomcat)
-export CATALINA_HOME=$(cat /etc/init.d/$CATALINA |\
-                       grep ^CATALINA_HOME |\
-                       awk -F'=' '{ print $2}' |\
-                       sed s/\$NAME/$CATALINA/ |\
-                       xargs echo)
-export CATALINA_BASE=$(cat /etc/init.d/$CATALINA |\
-                       grep ^CATALINA_BASE |\
-                       awk -F'=' '{ print $2}' |\
-                       sed s/\$NAME/$CATALINA/ |\
-                       xargs echo)
+if [ "$CATALINA" != "" ]; then
+  export CATALINA_HOME=$(cat /etc/init.d/$CATALINA |\
+                         grep ^CATALINA_HOME |\
+                         awk -F'=' '{ print $2}' |\
+                         sed s/\$NAME/$CATALINA/ |\
+                         xargs echo)
+  export CATALINA_BASE=$(cat /etc/init.d/$CATALINA |\
+                         grep ^CATALINA_BASE |\
+                         awk -F'=' '{ print $2}' |\
+                         sed s/\$NAME/$CATALINA/ |\
+                         xargs echo)
+elif [ "$CATALINASYSD" != "" ]; then
+  export CATALINA_HOME=$(cat $CATALINASYSD |\
+                   grep ^Environment |\
+       awk -F'="' '{ print substr($2, 1, length($2)-1); }' |\
+       grep ^CATALINA_HOME |\
+       awk -F '=' '{ print $2 }' |\
+       xargs echo)
+  export CATALINA_BASE=$(cat $CATALINASYSD |\
+                         grep ^Environment |\
+                         awk -F'="' '{ print substr($2, 1, length($2)-1); }' |\
+                         grep ^CATALINA_BASE |\
+                         awk -F '=' '{ print $2 }' |\
+                         xargs echo)
+else
+  err "WARNING: No tomcat in /etc/init.d nor in /etc/systemd" 
+fi  
+
 out "CATALINA_HOME=$CATALINA_HOME"
 out "CATALINA_BASE=$CATALINA_BASE"
 
 CMD="[ \"\$CATALINA_HOME\" != \"\" -a \"\$CATALINA_BASE\" != \"\" ]"
 exec_cmd "Did not find Tomcat environment variables CATALINA_HOME or CATALINA_BASE"
 
+TOMCAT_SYSUSR=$(cat /etc/passwd | grep tomcat | awk -F':' '{ print $1 }')
+
 cat >$CMD_FILE <<EOF
-TOMCAT_CONFDIR=/etc/tomcat7 &&\
+TOMCAT_CONFDIR=/etc/$TOMCATV &&\
 TOMCAT_USRFILE=\$TOMCAT_CONFDIR/tomcat-users.xml &&\
 sudo chmod -R 644 \$TOMCAT_CONFDIR &&\
 sudo chmod g+x,o+x,o+w \$TOMCAT_CONFDIR &&\
-sudo chmod g+x,g+w,o+w \$TOMCAT_USRFILE &&\
-sudo cp -n \$TOMCAT_USRFILE \${TOMCAT_USRFILE}_fgsetup &&\
-LN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | grep -n "</tomcat-users>" | awk -F":" '{ print \$1 }') &&\
-ALN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | wc -l) &&\
-sudo cat \${TOMCAT_USRFILE}_fgsetup | head -n \$((LN-1)) > \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\"manager-gui\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\"manager-script\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\"tomcat\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <role rolename=\\"liferay\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo echo "                 <user username=\\"$TOMCAT_USER\\" password=\\"$TOMCAT_PASSWORD\\" roles=\\"tomcat,liferay,manager-gui,manager-script\\"/>" >> \$TOMCAT_USRFILE &&\
-sudo cat \${TOMCAT_USRFILE}_fgsetup | tail -n \$((ALN-LN+1)) >> \$TOMCAT_USRFILE &&\
-sudo chmod o-w \$TOMCAT_CONFDIR &&\
-sudo chmod o-w \$TOMCAT_USRFILE 
+sudo chmod g+x,g+w,o+w \$TOMCAT_USRFILE;\
+if [ ! -f \${TOMCAT_USRFILE}_fgsetup ]; then
+  sudo cp -n \$TOMCAT_USRFILE \${TOMCAT_USRFILE}_fgsetup &&\
+  LN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | grep -n "</tomcat-users>" | awk -F":" '{ print \$1 }') &&\
+  ALN=\$(sudo cat \${TOMCAT_USRFILE}_fgsetup | wc -l) &&\
+  sudo cat \${TOMCAT_USRFILE}_fgsetup | head -n \$((LN-1)) > \$TOMCAT_USRFILE &&\
+  sudo echo "                 <role rolename=\\"manager-gui\\"/>" >> \$TOMCAT_USRFILE &&\
+  sudo echo "                 <role rolename=\\"manager-script\\"/>" >> \$TOMCAT_USRFILE &&\
+  sudo echo "                 <role rolename=\\"tomcat\\"/>" >> \$TOMCAT_USRFILE &&\
+  sudo echo "                 <role rolename=\\"liferay\\"/>" >> \$TOMCAT_USRFILE &&\
+  sudo echo "                 <user username=\\"$TOMCAT_USER\\" password=\\"$TOMCAT_PASSWORD\\" roles=\\"tomcat,liferay,manager-gui,manager-script\\"/>" >> \$TOMCAT_USRFILE &&\
+  sudo cat \${TOMCAT_USRFILE}_fgsetup | tail -n \$((ALN-LN+1)) >> \$TOMCAT_USRFILE &&\
+  sudo chmod o-w \$TOMCAT_CONFDIR &&\
+  sudo chmod o-w \$TOMCAT_USRFILE;\
+else\
+  err "Warning file: '\${TOMCAT_USRFILE}' already processed";\
+fi
 EOF
 CMD=$(cat $CMD_FILE)
 exec_cmd "Unable to configure tomcat user roles"
@@ -158,44 +184,48 @@ cat >$CMD_FILE <<EOF
 TOMCAT_CONFDIR=/etc/$TOMCATV &&\
 SERVER_XML=\$TOMCAT_CONFDIR/server.xml &&\
 sudo chmod g+x,g+w,o+x,o+w \$TOMCAT_CONFDIR &&
-sudo chmod g+r,g+w,o+r,o+w \$SERVER_XML &&\
-sudo cp -n \$SERVER_XML \${SERVER_XML}_fgsetup &&\
-LN=\$(cat \${SERVER_XML}_fgsetup | grep -n "</GlobalNamingResources>" | awk -F":" '{ print \$1 }') &&\
-ALN=\$(cat \${SERVER_XML}_fgsetup | wc -l) &&\
-sudo cat \${SERVER_XML}_fgsetup | head -n \$((LN-1)) > \$SERVER_XML &&\
-sudo echo "               <Resource name=\\"jdbc/UserTrackingPool\\"" >> \$SERVER_XML &&\
-sudo echo "                           auth=\\"Container\\"" >> \$SERVER_XML &&\
-sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERVER_XML &&\
-sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
-sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
-sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
-sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_NAME\\"" >> \$SERVER_XML &&\
-sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
-sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
-sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
-sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxWaitMillis=\\"10000\\"" >> \$SERVER_XML &&\
-sudo echo "                           validationQuery=\\"select 1 as connection_test\\"/>" >> \$SERVER_XML &&\
-sudo echo "                 <Resource name=\\"jdbc/gehibernatepool\\"" >> \$SERVER_XML &&\
-sudo echo "                           auth=\\"Container\\"" >> \$SERVER_XML &&\
-sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERVER_XML &&\
-sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
-sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
-sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
-sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_NAME\\"" >> \$SERVER_XML &&\
-sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
-sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
-sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
-sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
-sudo echo "                           maxWaitMillis=\\"10000\\"" >> \$SERVER_XML &&\
-sudo echo "                           validationQuery=\\"select 1 as connection_test\\"/>" >> \$SERVER_XML &&\
-sudo cat \${SERVER_XML}_fgsetup | tail -n \$((ALN-LN+1)) >> \$SERVER_XML &&\
-sudo chmod g+x,g-w,o+x,o-w \$TOMCAT_CONFDIR &&\
-sudo chmod g+r,g-w,o+r,o-w \$SERVER_XML
+sudo chmod g+r,g+w,o+r,o+w \$SERVER_XML;\
+if [ ! -f \${SERVER_XML}_fgsetup ]; then
+  sudo cp -n \$SERVER_XML \${SERVER_XML}_fgsetup &&\
+  LN=\$(cat \${SERVER_XML}_fgsetup | grep -n "</GlobalNamingResources>" | awk -F":" '{ print \$1 }') &&\
+  ALN=\$(cat \${SERVER_XML}_fgsetup | wc -l) &&\
+  sudo cat \${SERVER_XML}_fgsetup | head -n \$((LN-1)) > \$SERVER_XML &&\
+  sudo echo "               <Resource name=\\"jdbc/UserTrackingPool\\"" >> \$SERVER_XML &&\
+  sudo echo "                           auth=\\"Container\\"" >> \$SERVER_XML &&\
+  sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERVER_XML &&\
+  sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
+  sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
+  sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
+  sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_NAME\\"" >> \$SERVER_XML &&\
+  sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
+  sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
+  sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
+  sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
+  sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
+  sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
+  sudo echo "                           maxWaitMillis=\\"10000\\"" >> \$SERVER_XML &&\
+  sudo echo "                           validationQuery=\\"select 1 as connection_test\\"/>" >> \$SERVER_XML &&\
+  sudo echo "                 <Resource name=\\"jdbc/gehibernatepool\\"" >> \$SERVER_XML &&\
+  sudo echo "                           auth=\\"Container\\"" >> \$SERVER_XML &&\
+  sudo echo "                           type=\\"javax.sql.DataSource\\"" >> \$SERVER_XML &&\
+  sudo echo "                           username=\\"$UTDB_USER\\"" >> \$SERVER_XML &&\
+  sudo echo "                           password=\\"$UTDB_PASSWD\\"" >> \$SERVER_XML &&\
+  sudo echo "                           driverClassName=\\"com.mysql.jdbc.Driver\\"" >> \$SERVER_XML &&\
+  sudo echo "                           url=\\"jdbc:mysql://$UTDB_HOST:$UTDB_PORT/$UTDB_NAME\\"" >> \$SERVER_XML &&\
+  sudo echo "                           testOnBorrow=\\"true\\"" >> \$SERVER_XML &&\
+  sudo echo "                           testWhileIdle=\\"true\\"" >> \$SERVER_XML &&\
+  sudo echo "                           validationInterval=\\"0\\"" >> \$SERVER_XML &&\
+  sudo echo "                           initialSize=\\"3\\"" >> \$SERVER_XML &&\
+  sudo echo "                           maxTotal=\\"100\\"" >> \$SERVER_XML &&\
+  sudo echo "                           maxIdle=\\"30\\"" >> \$SERVER_XML &&\
+  sudo echo "                           maxWaitMillis=\\"10000\\"" >> \$SERVER_XML &&\
+  sudo echo "                           validationQuery=\\"select 1 as connection_test\\"/>" >> \$SERVER_XML &&\
+  sudo cat \${SERVER_XML}_fgsetup | tail -n \$((ALN-LN+1)) >> \$SERVER_XML &&\
+  sudo chmod g+x,g-w,o+x,o-w \$TOMCAT_CONFDIR &&\
+  sudo chmod g+r,g-w,o+r,o-w \$SERVER_XML;\
+else\
+  err "Warning file: '\${SERVER_XML}' already processed";\
+fi
 EOF
 CMD=$(cat $CMD_FILE)
 exec_cmd "Unable to setup UserTracking connection pools"
@@ -209,8 +239,8 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      sudo mkdir -p \$CATALINA_HOME/server/classes &&\
      sudo mkdir -p \$CATALINA_HOME/shared/classes &&\
      sudo mkdir -p \$CATALINA_BASE/webapps/ROOT &&\
-     sudo chown -R $TOMCATV.$TOMCATV /var/log/$TOMCATV &&\
-     sudo chown -R $TOMCATV.$TOMCATV /var/lib/$TOMCATV/logs &&\
+     sudo chown -R $TOMCAT_SYSUSR:\$USER \$CATALINA_HOME &&\
+     sudo chown -R $TOMCAT_SYSUSR:\$USER \$CATALINA_BASE &&\
      sudo mv -n $CATALINA_BASE/webapps/ROOT $CATALINA_HOME/webapps/ &&\
      cd \$CATALINA_HOME/conf &&\
      sudo rm -f tomcat-users.xml &&\
@@ -222,17 +252,17 @@ exec_cmd "Unable to setup $TOMCATV directories"
 
 # Do not use service since containers may not accept this way
 # Starting Tomcat using startup script
-out "Checking for $CATALINA service ... " 1
-CMD="CATALINAP=$(ps -ef | grep \$CATALINA | grep -v grep | awk '{ print \$2 }')"
+out "Checking for $TOMCATV service ... " 1
+CMD="CATALINAP=$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo)"
 exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
 
 if [ "$CATALINAP" = "" ]; then
-  out "Starting $CATALINA ..." 1
+  out "Starting $TOMCATV ..." 1
   CMD="sudo $CATALINA_HOME/bin/catalina.sh start &&\
-       CATALINAP=\$(ps -ef | grep \$CATALINA | grep -v grep | awk '{ print \$2 }') &&\
+       CATALINAP=\$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo) &&\
        [ \"\$CATALINAP\" != \"\" ]"
-  exec_cmd "Unable to start service $CATALINA"\
-           "($CATALINA: \$CATALINAP')"
+  exec_cmd "Unable to start service $TOMCATV"\
+           "($TOMCATV: \$CATALINAP')"
 fi
     
 # Check mysql client
@@ -434,4 +464,3 @@ out "User profile successfully created"
 
 out "Successfully finished FutureGateway APIServerDaemon apt-get versioned setup script"
 exit $RES
-
