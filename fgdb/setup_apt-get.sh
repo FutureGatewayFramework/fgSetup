@@ -67,8 +67,8 @@ exec_cmd "Failed installing required packages"
 
 # Mysql passwordless installation
 cat >$CMD_FILE <<EOF
-echo "mysql-server-5.6 mysql-server/root_password password rpass" | sudo debconf-set-selections &&\
-echo "mysql-server-5.6 mysql-server/root_password_again password rpass" | sudo debconf-set-selections &&\
+echo "mysql-server mysql-server/root_password password rpass" | sudo debconf-set-selections &&\
+echo "mysql-server mysql-server/root_password_again password rpass" | sudo debconf-set-selections &&\
 sudo apt-get install -y mysql-server
 EOF
 CMD=$(cat $CMD_FILE)
