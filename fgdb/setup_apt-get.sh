@@ -37,12 +37,14 @@ trap cleanup_tempFiles EXIT
 # Local temporary files for SSH output and error files
 STD_OUT=$(mktemp -t stdout.XXXXXX)
 STD_ERR=$(mktemp -t stderr.XXXXXX)
-TEMP_FILES+=( $STD_OUT )
-TEMP_FILES+=( $STD_ERR )
 CMD_OUT=$(mktemp -t stdout.XXXXXX)
 CMD_ERR=$(mktemp -t stderr.XXXXXX)
+CMD_FILE=$(mktemp -t command.XXXXXX)
+TEMP_FILES+=( $STD_OUT )
+TEMP_FILES+=( $STD_ERR )
 TEMP_FILES+=( $CMD_OUT )
 TEMP_FILES+=( $CMD_ERR )
+TEMP_FILES+=( $CMD_FILE )
 
 out "Starting FutureGateway database apt-get versioned setup script"
 
@@ -59,30 +61,38 @@ APTPACKAGES=(
   wget
   coreutils
   jq
-  mysql-server
 )
 CMD="install_apt ${APTPACKAGES[@]}"
 exec_cmd "Failed installing required packages"
+
+# Mysql passwordless installation
+cat >$CMD_FILE <<EOF
+echo "mysql-server-5.6 mysql-server/root_password password rpass" | sudo debconf-set-selections &&\
+echo "mysql-server-5.6 mysql-server/root_password_again password rpass" | sudo debconf-set-selections &&\
+sudo apt-get install -y mysql-server
+EOF
+CMD=$(cat $CMD_FILE)
+exec_cmd "Unable to setup mysql-server"
 
 out "Starting mysql service ... " 1
 # Using restart since mysql could be already running
 CMD="sudo service mysql start 2>$CMD_ERR >$CMD_OUT"
 exec_cmd "Unable to start mysql service"
-    
+
 # Check mysql client
 out "Looking up mysql client ... " 1
 CMD="MYSQL=\$(which mysql)"
 exec_cmd "Did not find mysql command" "(\$MYSQL)"
 
+#Native mysql native password mode
+out "Setup mysql native password mode ... " 1
+CMD="sudo $MYSQL -u root -prpass -e \"use mysql; update user set authentication_string=password('"$FGDB_ROOTPWD"'), plugin='mysql_native_password' where user='root'; flush privileges;\""
+exec_cmd "Unable to setup mysql native password mode"  
+
 # Check mysql client
 out "Looking up mysql version ... " 1
 CMD="MYSQLVER=\$(\$MYSQL -V | awk '{ print \$5 }' | awk -F \".\" '{ v=\$1*10+\$2; printf (\"%s\",v) }')"
 exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
-    
-#Native mysql native password mode
-out "Setup mysql native password mode ... " 1
-CMD="sudo $MYSQL -u root -e \"use mysql; update user set plugin='mysql_native_password'; flush privileges;\""
-exec_cmd "Unable to setup mysql native password mode"  
 
 #Check mysql connectivity
 out "Checking mysql connectivity ... " 1
