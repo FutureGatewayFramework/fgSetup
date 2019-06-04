@@ -67,8 +67,8 @@ exec_cmd "Failed installing required packages"
 
 # Mysql passwordless installation
 cat >$CMD_FILE <<EOF
-echo "mysql-server mysql-server/root_password password rpass" | sudo debconf-set-selections &&\
-echo "mysql-server mysql-server/root_password_again password rpass" | sudo debconf-set-selections &&\
+echo "mysql-server mysql-server/root_password password ${FGDB_ROOTPWD}" | sudo debconf-set-selections &&\
+echo "mysql-server mysql-server/root_password_again password ${FGDB_ROOTPWD}" | sudo debconf-set-selections &&\
 sudo apt-get install -y mysql-server
 EOF
 CMD=$(cat $CMD_FILE)
@@ -86,8 +86,8 @@ exec_cmd "Did not find mysql command" "(\$MYSQL)"
 
 #Native mysql native password mode
 out "Setup mysql native password mode ... " 1
-CMD="sudo $MYSQL -u root -prpass -e \"use mysql; update user set authentication_string=password('"$FGDB_ROOTPWD"'), plugin='mysql_native_password' where user='root'; flush privileges;\""
-exec_cmd "Unable to setup mysql native password mode"  
+CMD="sudo $MYSQL -u root -p${FGDB_ROOTPWD} -e \"use mysql; update user set plugin='mysql_native_password' where user='root'; flush privileges;\""
+exec_cmd "Unable to setup mysql native password plugin"
 
 # Check mysql client
 out "Looking up mysql version ... " 1
@@ -96,7 +96,7 @@ exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
 
 #Check mysql connectivity
 out "Checking mysql connectivity ... " 1
-CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
+CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root -p$FGDB_ROOTPWD -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
 exec_cmd "Missing mysql connectivity"
 
 # Getting or updading software from Git (database in fgAPIServer repo)
