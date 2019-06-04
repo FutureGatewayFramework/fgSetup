@@ -49,7 +49,8 @@ WORKDIR $TEST_DIR
 ADD do_tests.sh do_tests.sh
 
 # Getting FG repo
-RUN echo "StrictHostKeyChecking no\nUserKnownHostsFile=/dev/null\n" > ssh_opt &&\
+RUN sudo chown $TEST_USER:$TEST_USER do_tests.sh &&\
+    echo "StrictHostKeyChecking no\nUserKnownHostsFile=/dev/null\n" > ssh_opt &&\
     sudo su - -c "cat $TEST_DIR/ssh_opt >> /etc/ssh/ssh_config" &&\
     rm -f ssh_opt &&\
 # SSH keygen
