@@ -277,7 +277,7 @@ exec_cmd "Did not retrieve mysql version" "(\$MYSQLVER)"
 
 #Check connectivity
 out "Checking mysql connectivity ... " 1
-CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root $([ \"$FGDB_ROOTPWD\" != \"\" ] && echo \"-p$FGDB_ROOTPWD\") -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
+CMD="$MYSQL -h $UTDB_HOST -P $UTDB_PORT -u root -p$UTDB_ROOTPWD -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
 exec_cmd "Missing mysql connectivity"
 
 #
@@ -341,11 +341,11 @@ exec_cmd "Following Git repositories failed to clone/update: \"$MISSING_GITREPO\
 # Create Grid and Cloud engine UsersTrackingDB
 out "Installing Grid and Cloud Engine UsersTrackingDB ... "
 INSTALL_UTDB=0
-mysql -u root userstracking -e "" 1>/dev/null 2>/dev/null &&\
+$MYSQL -h $UTDB_HOST -P $UTDB_PORT -u root -p$UTDB_ROOTPWD $UTDB_NAME -e "" 1>/dev/null 2>/dev/null &&\
   out "UsersTrackingDB already present" ||\
   INSTALL_UTDB=1
 [ $INSTALL_UTDB -ne 0 ] &&\
-  CMD="sudo mysql -u root < grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql" &&\
+  CMD="$MYSQL -h $UTDB_HOST -P $UTDB_PORT -u root -p$UTDB_ROOTPWD < grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql" &&\
   exec_cmd "Unable to setup Grid and Cloud Engine UsersTrackingDB" ||\
   out "Grid and Cloud Engine UsersTrackingDB already present"
 

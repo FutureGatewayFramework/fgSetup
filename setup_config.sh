@@ -8,6 +8,7 @@
 #
 
 # Generic setup configurations
+RANDOMPASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 6)
 
 # Setup log file
 FGLOG=$HOME/FutureGateway_setup.log            # If empty std-out only reporting for setup
@@ -47,7 +48,7 @@ FGDB_HOST=127.0.0.1                  # Database server address
 FGDB_HOSTUNAME=$FG_USER              # Database host username
 FGDB_PORT=3306                       # Database port number
 FGDB_NAME=fgapiserver                # Database name
-FGDB_ROOTPWD=rpass                   # Leave it empty for no password
+FGDB_ROOTPWD=$RANDOMPASS             # Use random password or set one here
 FGDB_USER=fgapiserver                # Database username
 FGDB_PASSWD=fgapiserver_password     # Database username password
 FGDB_SSHPORT=22                      # Database ssh port number
@@ -57,11 +58,11 @@ FGDB_VER=0.0.13                      # Database schema version
 
 # GridnCloud Engine DB settings (GridnCloud Engine EI)
 UTDB_FGAPPID=10000                   # FutureGateway appId in GridnCloud Engine
-UTDB_HOST=127.0.0.1                  # Database server address
-UTDB_HOSTUNAME=futuregateway         # Database host username
-UTDB_PORT=3306                       # Database port number
+UTDB_HOST=$FGDB_HOST                 # Database server address
+UTDB_HOSTUNAME=$FG_USER              # Database host username
+UTDB_PORT=$FGDB_PORT                 # Database port number
 UTDB_NAME=userstracking              # Database name
-UTDB_ROOTPWD=                        # Leave it empty for no password
+UTDB_ROOTPWD=$FGDB_ROOTPWD           # Leave it empty for no password
 UTDB_USER=tracking_user              # Database username
 UTDB_PASSWD=usertracking             # Database username password
 

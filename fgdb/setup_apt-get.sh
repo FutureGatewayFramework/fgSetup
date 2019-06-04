@@ -99,6 +99,8 @@ out "Checking mysql connectivity ... " 1
 CMD="$MYSQL -h $FGDB_HOST -P $FGDB_PORT -u root -p$FGDB_ROOTPWD -e \"select version()\" >$CMD_OUT 2>$CMD_ERR"
 exec_cmd "Missing mysql connectivity"
 
+out "MYSQL root password: $FGDB_ROOTPWD"
+
 # Getting or updading software from Git (database in fgAPIServer repo)
 CMD="git_clone_or_update \"$GIT_BASE\" \"$FGAPISERVER_GITREPO\" \"$FGAPISERVER_GITTAG\""
 exec_cmd "Unable to clone or update repository: \"$FGAPISERVER_GITREPO\""
