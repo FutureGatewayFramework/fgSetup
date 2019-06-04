@@ -1,0 +1,10 @@
+source tests/test_env
+TEST_NAME="API: /users/<user>/data (GET)"
+TEST_CASE="user_data"
+TEST_DESC="Retrieve user data records"
+
+curl -s -f -S\
+     -H "Authorization: Bearer $TKN"\
+     http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/users/futuregateway/data
+RES=$?
+exit $RES

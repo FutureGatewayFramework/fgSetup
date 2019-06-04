@@ -1,0 +1,23 @@
+source tests/test_env
+TEST_NAME="API: /users/<user>/data/<name> (POST)"
+TEST_CASE="post_user_data_name"
+TEST_DESC="Add user data record with name"
+
+USER_DATA=$(mktemp)
+cat > $USER_DATA <<EOF
+{
+  "data_value": "TEST_DATA_VALUE",
+  "data_desc": "TEST_DATA_DESCRIPTION",
+  "data_proto": "TEST_DATA_PROTO",
+  "data_type": "TEST_DATA_TYPE"
+}
+EOF
+curl -s -f -S\
+     -H "Content-type: Application/json"\
+     -H "Authorization: Bearer $TKN"\
+     -X POST\
+     -d @$USER_DATA\
+     http://$FGAPISERVER_HOST/fgapiserver/$FGAPISERVER_APIVER/users/futuregateway/data/TEST_DATA_NAME
+RES=$?
+rm -f $USER_DATA
+exit $RES
