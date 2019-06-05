@@ -253,6 +253,14 @@ exec_cmd "Unable to setup $TOMCATV directories"
 # Set shutdown port
 replace_line $TOMCAT_CONFDIR/server.xml "<Server port=\"-1\"" "<Server port=\"8005\" shutdown=\"SHUTDOWN\">"
 
+# Setup groups
+#  futuregateway in tomcat group
+#  tomcat in futuregatway group
+#  tomcat in www-data (needed for FGAPISERVER_IOPATH)
+sudo usermod -a -G $TOMCAT_SYSUSR $FG_USER
+sudo usermod -a -G $FG_USER $TOMCAT_SYSUSR
+sudo usermod -a -G www-data $TOMCAT_SYSUSR
+
 # Check mysql client
 out "Looking up mysql client ... " 1
 CMD="MYSQL=\$(which mysql)"
@@ -348,11 +356,11 @@ exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
 
 if [ "$CATALINAP" = "" ]; then
   out "Starting $TOMCATV ..." 1
-  CMD="sudo -u $TOMCAT_SYSUSR $CATALINA_HOME/bin/catalina.sh start" &&\
-       CATALINAP=\$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo) &&\
-       [ \"\$CATALINAP\" != \"\" ]"
-  exec_cmd "Unable to start service $TOMCATV"\
-           "($TOMCATV: \$CATALINAP')"
+  CMD="export UMASK="0022" &&\
+       sudo -u $TOMCAT_SYSUSR $CATALINA_HOME/bin/catalina.sh start &&\
+       CATALINAP=\$(ps -ef | grep $TOMCAT_SYSUSR | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo) &&\
+  [ \"\$CATALINAP\" != \"\" ]"
+  exec_cmd "Unable to start service $TOMCATV" "($TOMCATV: \$CATALINAP)"
 else
   out "Service $TOMCATV is already running with pid: $CATALINAP"
 fi
@@ -363,7 +371,6 @@ fi
 out "Starting APIServerDaemon components compilation ... "
 
 # Creting lib/ directory under APIServerDaemon dir
-mkdir -p $APISERVERDAEMON_GITREPO/lib
 mkdir -p $APISERVERDAEMON_GITREPO/web/WEB-INF/lib
 
 # Compile EI components and APIServerDaemon
@@ -438,6 +445,26 @@ exec_cmd "Unable to install APIServerDaemon.war file"
 cd - 2>&1 >/dev/null
 
 out "Successfully compiled and installed APIServerDaemon components"
+
+# APIServerDaemon accessrights and ownership, the loop waits until the webapp dir is available
+MAX_LOOPS=6
+for i in $(seq 1 $MAX_LOOPS); do
+  [ -d $CATALINA_HOME/webapps/APIServerDaemon ] &&\
+    out "APIServerDaemon directory: '"$CATALINA_HOME/webapps/APIServerDaemon"' exists" &&\
+    break ||\
+    out "APIServerDaemon directory: '"$CATALINA_HOME/webapps/APIServerDaemon"' not existing yet (${i}/${MAX_LOOPS})"
+  sleep 10
+done
+if [ $i -gt $MAX_LOOPS ]; then
+  out "WARNING: Reached timeout while looking for tomcat' APIServerDaemon folder"
+else
+  sudo chmod -R g+x,g+r,g+w,o+x,o+r $CATALINA_HOME/webapps/APIServerDaemon &&\
+  sudo chown -R $TOMCAT_SYSUSR:$FG_USER $CATALINA_HOME/webapps/APIServerDaemon
+fi
+
+# Setup access rights to $FGAPISERVER_IOPATH
+sudo chown -R futuregateway:tomcat $FGAPISERVER_IOPATH
+sudo chmod -R u+r,u+w,u+x,g+r,g+w,g+x,o+r $FGAPISERVER_IOPATH
 
 # Environment setup
 out "Preparing the environment ..."
