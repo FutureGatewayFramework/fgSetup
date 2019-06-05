@@ -1,5 +1,7 @@
 # OS
-FROM ubuntu:14.04
+# FROM ubuntu:14.04
+# FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # Maintainer
 MAINTAINER Riccardo Bruno <riccardo.bruno@ct.infn.it>

@@ -32,3 +32,32 @@ sudo su - -c "echo \"127.0.0.1    sshnode\" >> /etc/hosts"
 sudo su - -c "echo \"127.0.0.1    fgdb\" >> /etc/hosts"
 sudo useradd -m -p $(echo "test" |openssl passwd -1 -stdin)  -s /bin/bash test
 ```
+
+# Code changes
+The following commands are useful to apply APIServerDaemon code changes.
+
+```bash
+rm -rf ~/APIServerDaemon/web/WEB-INF/lib
+mkdir -p ~/APIServerDaemon/web/WEB-INF/lib
+cp ~/grid-and-cloud-engine/grid-and-cloud-engine-threadpool/target/lib/*.jar ~/APIServerDaemon/web/WEB-INF/lib/
+cp ~/grid-and-cloud-engine/grid-and-cloud-engine-threadpool/target/*.jar ~/APIServerDaemon/web/WEB-INF/lib/
+cp ~/grid-and-cloud-engine/grid-and-cloud-engine_M/target/lib/*.jar ~/APIServerDaemon/web/WEB-INF/lib/
+cp ~/grid-and-cloud-engine/grid-and-cloud-engine_M/target/*.jar ~/APIServerDaemon/web/WEB-INF/lib/
+cp ~/jsaga-adaptor-rocci/dist/jsaga-adaptor-rocci.jar ~/APIServerDaemon/web/WEB-INF/lib
+cd ~/APIServerDaemon
+mvn clean; mvn install
+sudo cp target/APIServerDaemon.war $CATALINA_HOME/webapps/
+```
+
+To monitor the reloading phase of the APIServerDaemon web application, use:
+
+```bash
+tail -f $CATALINA_HOME/logs/catalina.out
+```
+
+# Execution control
+Use the following commands to monitor APIServerDaemon activities
+
+* Tomcat log: `tail -f $CATALINA_HOME/logs/catalina.out`
+* APIServerDaemon log: `tail -f $CATALINA_HOME/webapps/APIServerDaemon/WEB-INF/logs/APIServerDaemon.log`
+* GridEngine log: `tail -f $CATALINA_HOME/webapps/APIServerDaemon/WEB-INF/logs/GridEngineLog.log`
