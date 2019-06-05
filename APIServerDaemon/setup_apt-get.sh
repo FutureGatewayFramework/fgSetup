@@ -250,21 +250,6 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      cd -"
 exec_cmd "Unable to setup $TOMCATV directories"
 
-# Do not use service since containers may not accept this way
-# Starting Tomcat using startup script
-out "Checking for $TOMCATV service ... " 1
-CMD="CATALINAP=$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo)"
-exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
-
-if [ "$CATALINAP" = "" ]; then
-  out "Starting $TOMCATV ..." 1
-  CMD="sudo $CATALINA_HOME/bin/catalina.sh start &&\
-       CATALINAP=\$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo) &&\
-       [ \"\$CATALINAP\" != \"\" ]"
-  exec_cmd "Unable to start service $TOMCATV"\
-           "($TOMCATV: \$CATALINAP')"
-fi
-    
 # Check mysql client
 out "Looking up mysql client ... " 1
 CMD="MYSQL=\$(which mysql)"
@@ -348,6 +333,26 @@ $MYSQL -h $UTDB_HOST -P $UTDB_PORT -u root -p$UTDB_ROOTPWD $UTDB_NAME -e "" 1>/d
   CMD="$MYSQL -h $UTDB_HOST -P $UTDB_PORT -u root -p$UTDB_ROOTPWD < grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql" &&\
   exec_cmd "Unable to setup Grid and Cloud Engine UsersTrackingDB" ||\
   out "Grid and Cloud Engine UsersTrackingDB already present"
+
+#
+# Now it is possible to start Tomcat service
+#
+# Do not use service since containers may not accept this way
+# Starting Tomcat using startup script
+out "Checking for $TOMCATV service ... " 1
+CMD="CATALINAP=$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo)"
+exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
+
+if [ "$CATALINAP" = "" ]; then
+  out "Starting $TOMCATV ..." 1
+  CMD="sudo $CATALINA_HOME/bin/catalina.sh start &&\
+       CATALINAP=\$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo) &&\
+       [ \"\$CATALINAP\" != \"\" ]"
+  exec_cmd "Unable to start service $TOMCATV"\
+           "($TOMCATV: \$CATALINAP')"
+else
+  out "Service $TOMCATV is already running with pid: $CATALINAP"
+fi
 
 #
 # Compiling APIServerDaemon components and executor interfaces
