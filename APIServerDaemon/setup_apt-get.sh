@@ -260,6 +260,7 @@ replace_line $TOMCAT_CONFDIR/server.xml "<Server port=\"-1\"" "<Server port=\"80
 sudo usermod -a -G $TOMCAT_SYSUSR $FG_USER
 sudo usermod -a -G $FG_USER $TOMCAT_SYSUSR
 sudo usermod -a -G www-data $TOMCAT_SYSUSR
+sudo usermod -a -G $TOMCAT_SYSUSR www-data 
 
 # Check mysql client
 out "Looking up mysql client ... " 1
@@ -288,6 +289,18 @@ out "Extracting/installing software ..."
 # Actually the new recommended way to install it is via maven configuring the java project.
 # This installation will perform the new suggested way as reported at:
 # https://indigo-dc.gitbooks.io/jsaga-resource-management/content/deployment.html
+sudo mkdir -p $CATALINA_BASE/bin
+sudo cat > $CATALINA_BASE/bin/setenv.sh <<EOF
+export JSAGA_HOME=${HOME}
+EOF
+sudo chmod +x $CATALINA_BASE/bin/setenv.sh
+sudo chown -R $TOMCAT_SYSUSR:$FG_USER $CATALINA_BASE
+
+# Above setenv.sh seems to be ignored, the following allows the execution
+sudo mkdir /.jsaga
+sudo chown $TOMCAT_SYSUSR:$FG_USER /.jsaga
+sudo chmod g+r,g+w,g+x /.jsaga 
+
 
 # OCCI+(GSI)
 OCCI=$(which occi)
