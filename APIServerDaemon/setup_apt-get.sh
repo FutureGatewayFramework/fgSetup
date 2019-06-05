@@ -250,6 +250,9 @@ CMD="sudo mkdir -p \$CATALINA_HOME/temp &&\
      cd -"
 exec_cmd "Unable to setup $TOMCATV directories"
 
+# Set shutdown port
+replace_line $TOMCAT_CONFDIR/server.xml "<Server port=\"-1\"" "<Server port=\"8005\" shutdown=\"SHUTDOWN\">"
+
 # Check mysql client
 out "Looking up mysql client ... " 1
 CMD="MYSQL=\$(which mysql)"
@@ -345,7 +348,7 @@ exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
 
 if [ "$CATALINAP" = "" ]; then
   out "Starting $TOMCATV ..." 1
-  CMD="sudo $CATALINA_HOME/bin/catalina.sh start &&\
+  CMD="sudo -u $TOMCAT_SYSUSR $CATALINA_HOME/bin/catalina.sh start" &&\
        CATALINAP=\$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo) &&\
        [ \"\$CATALINAP\" != \"\" ]"
   exec_cmd "Unable to start service $TOMCATV"\
