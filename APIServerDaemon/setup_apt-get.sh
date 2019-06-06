@@ -361,7 +361,7 @@ $MYSQL -h $UTDB_HOST -P $UTDB_PORT -u root -p$UTDB_ROOTPWD $UTDB_NAME -e "" 1>/d
 # Do not use service since containers may not accept this way
 # Starting Tomcat using startup script
 out "Checking for $TOMCATV service ... " 1
-CMD="CATALINAP=$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' | xargs echo)"
+CMD="CATALINAP=$(ps -ef | grep \$TOMCATV | grep -v grep | grep java | awk '{ print \$2 }' 2>/dev/null | xargs echo)"
 exec_cmd "Unable to verify catalina process" "(PID: \$CATALINAP)"
 
 if [ "$CATALINAP" = "" ]; then
@@ -455,24 +455,8 @@ cd - 2>&1 >/dev/null
 
 out "Successfully compiled and installed APIServerDaemon components"
 
-# APIServerDaemon accessrights and ownership, the loop waits until the webapp dir is available
-MAX_LOOPS=6
-for i in $(seq 1 $MAX_LOOPS); do
-  [ -d $CATALINA_HOME/webapps/APIServerDaemon ] &&\
-    out "APIServerDaemon directory: '"$CATALINA_HOME/webapps/APIServerDaemon"' exists" &&\
-    break ||\
-    out "APIServerDaemon directory: '"$CATALINA_HOME/webapps/APIServerDaemon"' not existing yet (${i}/${MAX_LOOPS})"
-  sleep 10
-done
-if [ $i -gt $MAX_LOOPS ]; then
-  out "WARNING: Reached timeout while looking for tomcat' APIServerDaemon folder"
-else
-  sudo chmod -R g+x,g+r,g+w,o+x,o+r $CATALINA_HOME/webapps/APIServerDaemon &&\
-  sudo chown -R $TOMCAT_SYSUSR:$FG_USER $CATALINA_HOME/webapps/APIServerDaemon
-fi
-
 # Setup access rights to $FGAPISERVER_IOPATH
-sudo chown -R futuregateway:tomcat $FGAPISERVER_IOPATH
+sudo chown -R $FG_USER:$TOMCAT_SYSUSR $FGAPISERVER_IOPATH
 sudo chmod -R u+r,u+w,u+x,g+r,g+w,g+x,o+r $FGAPISERVER_IOPATH
 
 # Environment setup
