@@ -1,6 +1,6 @@
 # OS
-# FROM ubuntu:14.04
-# FROM ubuntu:16.04
+#FROM ubuntu:14.04
+#FROM ubuntu:16.04
 FROM ubuntu:18.04
 
 # Maintainer
