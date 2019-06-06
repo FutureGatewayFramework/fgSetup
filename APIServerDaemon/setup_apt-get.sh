@@ -389,19 +389,16 @@ MISSING_COMPILATION=""
 # rOCCI jsaga adaptor for Grid and Cloud Engine
 cd $ROCCI_GITREPO
 ant all || MISSING_COMPILATION=$MISSING_COMPILATION"$ROCCI_GITREPO "
-[ -f dist/$ROCCI_GITREPO.jar ] && cp dist/$ROCCI_GITREPO.jar ../$APISERVERDAEMON_GITREPO/lib/
 cd - 2>&1 >/dev/null
 
 # Grid and Cloud Engine
 cd $GNCENG_GITREPO/grid-and-cloud-engine-threadpool
 mvn install || MISSING_COMPILATION=$MISSING_COMPILATION"$GNCENG_GITREPO "
 GNCENG_THREADPOOL_LIB=$(find . -name '*.jar' | grep grid-and-cloud-engine-threadpool)
-[ -f $GNCENG_THREADPOOL_LIB ] && cp $GNCENG_THREADPOOL_LIB ../../$APISERVERDAEMON_GITREPO/lib/
 cd - 2>&1 >/dev/null
 cd $GNCENG_GITREPO/grid-and-cloud-engine_M
 mvn install || MISSING_COMPILATION=$MISSING_COMPILATION"$GNCENG_GITREPO "
 GNCENG_GNCENG_LIB=$(find . -name '*.jar' | grep grid-and-cloud-engine_M)
-[ -f $GNCENG_GNCENG_LIB ] && cp $GNCENG_GNCENG_LIB ../../$APISERVERDAEMON_GITREPO/lib/
 cd - 2>&1 >/dev/null
 
 cd $APISERVERDAEMON_GITREPO
@@ -440,7 +437,9 @@ out "done" 0 1
 cd $APISERVERDAEMON_GITREPO
 mkdir -p src/main/webapp/WEB-INF/lib/
 cp ../$ROCCI_GITREPO/dist/jsaga-adaptor-rocci.jar src/main/webapp/WEB-INF/lib/
+cp ../$GNCENG_GITREPO/grid-and-cloud-engine_M/target/*.jar src/main/webapp/WEB-INF/lib/
 cp ../$GNCENG_GITREPO/grid-and-cloud-engine_M/target/lib/*.jar src/main/webapp/WEB-INF/lib/
+cp ../$GNCENG_GITREPO/grid-and-cloud-engine-threadpool/target/*.jar src/main/webapp/WEB-INF/lib/
 cp ../$GNCENG_GITREPO/grid-and-cloud-engine-threadpool/target/lib/*.jar src/main/webapp/WEB-INF/lib/
 mvn install || MISSING_COMPILATION=$MISSING_COMPILATION"$APISERVERDAEMON_GITREPO "
 
