@@ -31,6 +31,8 @@ sed -i "s/  fgapisrv_lnkptvflag.*/  fgapisrv_lnkptvflag: False/" fgapiserver.yam
 sudo su - -c "echo \"127.0.0.1    sshnode\" >> /etc/hosts"
 sudo su - -c "echo \"127.0.0.1    fgdb\" >> /etc/hosts"
 sudo useradd -m -p $(echo "test" |openssl passwd -1 -stdin)  -s /bin/bash test
+# Now you can execute tests with:
+./test_futuregateway.sh
 ```
 
 # Code changes
@@ -56,8 +58,20 @@ tail -f $CATALINA_HOME/logs/catalina.out
 ```
 
 # Execution control
-Use the following commands to monitor APIServerDaemon activities
+Use the following commands to monitor APIServerDaemon activities:
 
 * Tomcat log: `tail -f $CATALINA_HOME/logs/catalina.out`
 * APIServerDaemon log: `tail -f $CATALINA_HOME/webapps/APIServerDaemon/WEB-INF/logs/APIServerDaemon.log`
 * GridEngine log: `tail -f $CATALINA_HOME/webapps/APIServerDaemon/WEB-INF/logs/GridEngineLog.log`
+
+Use the following commands to manage FutureGateway services:
+
+* **fgdb** - `sudo service mysql [start|stop|restart]`
+* **fgAPIServer** - `sudo service [start|stop|restart]`
+* **APIServerDaemon** - `sudo -u futuregateway $CATALINA_HOME/bin/catalina.sh [start|stop] &&`
+
+Please be sure to run Tomcat as futuregateway user.
+
+# Known issues
+
+* APIServerDemon don't start. This problem seems related to slower systems. The `catalina.out` file reports `null` ad FutureGateway DB version. In this case just restart tomcat.
