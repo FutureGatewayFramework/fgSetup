@@ -6,14 +6,18 @@ This kind of installation can be also used to install a compact FutureGatway sys
 To execute the tests, it is necessary to accomplish the following steps:
 
 1. Create the docker image
+
 `make image`
 
 2. Run the image
+
 `make run`
 
-3. Execute the tests. In order to execute the tests, it is necessary to open a shell on top of the running Docker container and execute the `do_tests.sh`script.
-`docker run -ti --rm --name fgtest futuregateway/fgtest:latest /bin/bash`
-`./do_tests.sh`
+3. Execute the tests. In order to execute the tests, it is necessary to open a shell on top of the running Docker container and execute the `do_tests.sh` script with:
+
+* Start the container: `docker run -d --rm --name fgtest futuregateway/fgtest:latest`
+* Enter the container: `docker exec -ti fgtest /bin/bash`
+* Install and execute tests: `./do_tests.sh`
 
 The test has two different phases. At the beginning it installs the Futuregateway components using the script based installation (apt based installation). In the second phase it runs a set of tests checking FutureGateway APIs.
 
@@ -74,4 +78,4 @@ Please be sure to run Tomcat as futuregateway user.
 
 # Known issues
 
-* APIServerDemon don't start. This problem seems related to slower systems. The `catalina.out` file reports `null` ad FutureGateway DB version. In this case just restart tomcat.
+* APIServerDemon don't start. This problem seems related to slower systems. The `catalina.out` file reports `null` as FutureGateway DB version. In this case just restart Tomcat.
