@@ -19,6 +19,7 @@ RUN  adduser --home $TEST_DIR --disabled-password --gecos "" $TEST_USER &&\
      adduser --home $FG_DIR --disabled-password --gecos "" $FG_USER &&\
      export DEBIAN_FRONTEND=noninteractive &&\
      apt-get update &&\
+     apt-get upgrade -y &&\
      apt-get install -y --no-install-recommends\
              sudo\
              screen\

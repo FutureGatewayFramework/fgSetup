@@ -79,3 +79,4 @@ Please be sure to run Tomcat as futuregateway user.
 # Known issues
 
 * APIServerDemon don't start. This problem seems related to slower systems. The `catalina.out` file reports `null` as FutureGateway DB version. In this case just restart Tomcat.
+* Script `do_tests.sh` hangs during the installation (apt installations). It may happen the apt-get command requires user prompt durign the installation. In such a case, it is recommended to verify first what is causing this problem looking in the log file: `/var/log/apt/term.log`. To avoid this problem, there are two possibilities: the first, installing manually the package and then re-executing the script. In the second case try the command `apt-get upgrade -y` and then retry the script execution.
