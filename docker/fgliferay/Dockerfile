@@ -49,6 +49,7 @@ RUN adduser --disabled-password --gecos "" $FG_USER &&\
     echo "$FG_TEST:$FG_TESTPWD" | /usr/sbin/chpasswd &&\
     apt-get update &&\
     apt-get install -y --no-install-recommends\
+            procps\
             curl\
             wget\
             ca-certificates\
