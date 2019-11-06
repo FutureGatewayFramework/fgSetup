@@ -8,7 +8,7 @@
 #
 DOCKER_REPO = futuregateway
 IMAGE_NAME = apiserverdaemon
-IMAGE_TAG = 0.2
+IMAGE_TAG = 0.3
 FG_NETWORK = fgnetwork_test
 FG_APISRVVOLNAME = fg_apiserver_test
 FG_APPSDIRVOLNAME = fg_apps_test

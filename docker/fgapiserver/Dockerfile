@@ -65,7 +65,7 @@ RUN adduser --disabled-password --gecos "" $FG_USER &&\
     apt-get update &&\
     apt-get install -y --no-install-recommends\
     ca-certificates\
-    mysql-client\
+    mariadb-client\
     sudo\
     git\
     mlocate\

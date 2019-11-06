@@ -1,5 +1,5 @@
 # OS
-FROM tomcat:7
+FROM tomcat:8
 
 # Maintainer
 MAINTAINER Riccardo Bruno <riccardo.bruno@ct.infn.it>
@@ -13,7 +13,7 @@ ENV FG_USER=futuregateway\
     MYSQL_PASSWORD=fgapiserver_password\
     MYSQL_DATABASE=fgapiserver\
     FGASD_GIT=https://github.com/FutureGatewayFramework/APIServerDaemon.git\
-    FGASD_BRANCH=user_data\
+    FGASD_BRANCH=py2py3\
     TOMCAT_USER=tomcat\
     TOMCAT_PASSWORD=tomcat__pass\
     FGAPISRV_IOSANDBOX=/app/fgiosandbox\
@@ -47,7 +47,7 @@ RUN adduser --disabled-password --gecos "" $FG_USER &&\
             -y\
             --no-install-recommends\
             openssh-client\
-            openjdk-7-jdk\
+            openjdk-8-jdk\
             ant\
             mysql-client\
             libmysql-java\
@@ -221,12 +221,12 @@ RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
 #
 # Build APIServerDaemon WAR
 #
-RUN cd APIServerDaemon && mkdir -p web/WEB-INF/lib && ant all
+RUN cd APIServerDaemon && mkdir -p web/WEB-INF/lib && mvn install
 
 # nginx port 80 available to the world outside this container
 EXPOSE 8080
 
 # Back to the root user, load the environment and place  APIServerDaemon webapp
 USER root 
-RUN cp /home/$FG_USER/APIServerDaemon/dist/APIServerDaemon.war $CATALINA_HOME/webapps/
+RUN cp /home/$FG_USER/APIServerDaemon/target/APIServerDaemon.war $CATALINA_HOME/webapps/
 

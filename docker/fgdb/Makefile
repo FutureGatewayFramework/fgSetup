@@ -8,7 +8,7 @@
 #
 DOCKER_REPO = futuregateway
 IMAGE_NAME = fgdb
-IMAGE_TAG = 0.2
+IMAGE_TAG = 0.3
 FG_NETWORK = fgnetwork_test
 FG_MYSQLDIRVOLNAME = fg_mysql_test
 
