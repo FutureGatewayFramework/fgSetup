@@ -197,7 +197,7 @@ RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
     mkdir -p .fgprofile &&\
     cp fgSetup/scripts/commons .fgprofile/commons &&\
     cp fgSetup/scripts/fgdb .fgprofile/fgdb &&\
-    cp fgSetup/scripts/fgdb .fgprofile/fgapiserver &&\
+    cp fgSetup/scripts/fgapiserver .fgprofile/fgapiserver &&\
     cp fgSetup/scripts/ei_gridengine .fgprofile/ei_gridengine &&\
 # Configure scripts
     ESC_FG_DIR=$(echo $FG_DIR | sed 's/\//\\\//g') &&\
