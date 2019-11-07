@@ -47,7 +47,7 @@ RUN adduser --disabled-password --gecos "" $FG_USER &&\
             -y\
             --no-install-recommends\
             openssh-client\
-            openjdk-7-jdk\
+            openjdk-8-jdk\
             ant\
             mysql-client\
             libmysql-java\

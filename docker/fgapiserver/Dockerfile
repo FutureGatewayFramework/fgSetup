@@ -39,7 +39,7 @@ ENV FG_USER=futuregateway\
  FGAPISRV_KEY=''\
  FGAPISRV_CRT=''\
  FGAPISRV_LOGCFG=fgapiserver_log.conf\
- FGAPISRV_DBVER=0.0.12b\
+ FGAPISRV_DBVER=0.0.13\
  FGAPISRV_SECRET=0123456789ABCDEF\
  FGAPISRV_NOTOKEN=False\
  FGAPISRV_NOTOKENUSR=test\
@@ -65,7 +65,7 @@ RUN adduser --disabled-password --gecos "" $FG_USER &&\
     apt-get update &&\
     apt-get install -y --no-install-recommends\
     ca-certificates\
-    mysql-client\
+    mariadb-client\
     sudo\
     git\
     mlocate\
@@ -98,7 +98,7 @@ RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
     mkdir -p .fgprofile &&\
     cp fgSetup/scripts/commons .fgprofile/commons &&\
     cp fgSetup/scripts/fgdb .fgprofile/fgdb &&\
-    cp fgSetup/scripts/fgdb .fgprofile/fgapiserver &&\
+    cp fgSetup/scripts/fgapiserver .fgprofile/fgapiserver &&\
     cp fgSetup/scripts/ei_gridengine .fgprofile/ei_gridengine &&\
 # Configure scripts
     ESC_FG_DIR=$(echo $FG_DIR | sed 's/\//\\\//g') &&\

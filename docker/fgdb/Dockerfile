@@ -97,7 +97,11 @@ RUN git clone $GNCENG -b $GNCENG_BRANCH &&\
 # Working directory
 USER root
 #RUN sed -i "s/#bind-address\t=\ 127.0.0.1/bind-address     =\ 127.0.0.1/" /etc/mysql/mysql.conf.d/mysqld.cnf
-RUN cat $FG_DIR/fgAPIServer/fgapiserver_db.sql > /docker-entrypoint-initdb.d/dbsetup.sql &&\
+RUN mysql_ssl_rsa_setup --datadir=/var/lib/mysql &&\
+    echo "ssl-ca=/var/lib/mysql/cacert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf &&\
+    echo "ssl-cert=/var/lib/mysql/server-cert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf &&\
+    echo "ssl-key=/var/lib/mysql/server-key.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf &&\
+    cat $FG_DIR/fgAPIServer/fgapiserver_db.sql > /docker-entrypoint-initdb.d/dbsetup.sql &&\
     cat $FG_DIR/fgAPIServer/fgapiserver_dbusr5.sql >> /docker-entrypoint-initdb.d/dbsetup.sql &&\
     cat $FG_DIR/grid-and-cloud-engine/UsersTrackingDB/UsersTrackingDB.sql >> /docker-entrypoint-initdb.d/dbsetup.sql
 
