@@ -22,7 +22,7 @@ TEST_PASS=test_pass
 FGDB_IMG=futuregateway/fgdb:0.3
 FGAPISERVER_IMG=futuregateway/fgapiserver:0.3
 FGAPISERVERDAEMON_IMG=futuregateway/apiserverdaemon:0.3
-SSHNODE_IMG=futuregateway/sshnode:0.3
+SSHNODE_IMG=futuregateway/sshnode:0.2
 
 #
 # FutureGateway instance settings

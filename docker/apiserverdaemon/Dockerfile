@@ -1,5 +1,5 @@
 # OS
-FROM tomcat:8
+FROM tomcat:7
 
 # Maintainer
 MAINTAINER Riccardo Bruno <riccardo.bruno@ct.infn.it>
@@ -92,19 +92,19 @@ WORKDIR $FG_DIR
 # Getting FG repo and setup properties files
 RUN git clone $FGASD_GIT -b $FGASD_BRANCH &&\
     sed -i "s/apisrv_dbhost\ =\ localhost/apisrv_dbhost\ =\ $FGDB_HOST/"\
-        APIServerDaemon/web/WEB-INF/classes/it/infn/ct/APIServerDaemon.properties &&\
+        APIServerDaemon/src/main/webapp/WEB-INF/classes/it/infn/ct/APIServerDaemon.properties &&\
     sed -i "s/utdb_host\ =\ localhost/utdb_host\ =\ $FGDB_HOST/"\
-         APIServerDaemon/web/WEB-INF/classes/it/infn/ct/APIServerDaemon.properties &&\
+        APIServerDaemon/src/main/webapp/WEB-INF/classes/it/infn/ct/APIServerDaemon.properties &&\
     sed -i "s/apisrv_dbhost\ =\ localhost/apisrv_dbhost\ =\ $FGDB_HOST/"\
-        APIServerDaemon/web/WEB-INF/classes/it/infn/ct/GridEngineDaemon.properties &&\
+        APIServerDaemon/src/main/webapp/WEB-INF/classes/it/infn/ct/GridEngineDaemon.properties &&\
     sed -i "s/utdb_host\ =\ localhost/utdb_host\ =\ $FGDB_HOST/"\
-         APIServerDaemon/web/WEB-INF/classes/it/infn/ct/GridEngineDaemon.properties &&\
+        APIServerDaemon/src/main/webapp/WEB-INF/classes/it/infn/ct/GridEngineDaemon.properties &&\
     sed -i "s/localhost:8888/$PTV_HSTPRT/"\
-        APIServerDaemon/web/WEB-INF/classes/it/infn/ct/ToscaIDC.properties &&\
+        APIServerDaemon/src/main/webapp/WEB-INF/classes/it/infn/ct/ToscaIDC.properties &&\
     sed -i "s/localhost:8889\\/get-token/$PTV_HSTPRT\\/get-token/"\
-         APIServerDaemon/web/WEB-INF/classes/it/infn/ct/ToscaIDC.properties &&\
-	 sed -i "s/localhost:/$FGDB_HOST:/"\
-           APIServerDaemon/web/META-INF/context.xml &&\
+        APIServerDaemon/src/main/webapp/WEB-INF/classes/it/infn/ct/ToscaIDC.properties &&\
+    sed -i "s/localhost:/$FGDB_HOST:/"\
+           APIServerDaemon/src/main/webapp/META-INF/context.xml &&\
     mkdir -p APIServerDaemon/work/WEB-INF/classes/it/infn/ct
 
 #
@@ -197,7 +197,7 @@ RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
     mkdir -p .fgprofile &&\
     cp fgSetup/scripts/commons .fgprofile/commons &&\
     cp fgSetup/scripts/fgdb .fgprofile/fgdb &&\
-    cp fgSetup/scripts/fgdb .fgprofile/fgapiserver &&\
+    cp fgSetup/scripts/fgapiserver .fgprofile/fgapiserver &&\
     cp fgSetup/scripts/ei_gridengine .fgprofile/ei_gridengine &&\
 # Configure scripts
     ESC_FG_DIR=$(echo $FG_DIR | sed 's/\//\\\//g') &&\
@@ -221,7 +221,10 @@ RUN git clone $FGSETUP_GIT -b $FGSETUP_BRANCH &&\
 #
 # Build APIServerDaemon WAR
 #
-RUN cd APIServerDaemon && mkdir -p web/WEB-INF/lib && mvn install
+RUN cd APIServerDaemon &&\
+    mkdir -p src/main/webapp/WEB-INF/lib/ &&\
+    cp lib/*.* src/main/webapp/WEB-INF/lib/ &&\
+    mvn install 
 
 # nginx port 80 available to the world outside this container
 EXPOSE 8080

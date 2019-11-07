@@ -6,10 +6,10 @@
 #
 
 # Tests are done submitting SayHello application, this needs to 
-# This needs to change the setup_app file
+# change the setup_app file
 for f in $(find $HOME/.fgprofile -type f); do source $f; done # FGLOADENV
 
-FGHOST=localhost/$FGAPISERVER_APIVER
+FGHOST=localhost/$FGAPIVER
 [ "$TEST_USER" = "" ] && TEST_USER="test"
 [ "$TEST_PASS" = "" ] && TEST_PASS="test"
 
@@ -27,8 +27,7 @@ TKN=$(curl -s\
            -H "Authorization: futuregateway:ZnV0dXJlZ2F0ZXdheQ=="\
            -X POST\
           $FGHOST/auth |\
-      jq '.token' |\
-      xargs echo) &&\
+      jq -r '.token') &&\
 echo "Session token from credentials: futuregateway/futuregateway: '$TKN'"
 
 # Checkpoint on Token
@@ -59,8 +58,7 @@ INFRA_ID=$(curl -s\
                       \"enabled\": true,
                       \"virtual\": false }"\
                 $FGHOST/infrastructures|\
-            jq '.id' |\
-            xargs echo) &&\
+            jq -r '.id') &&\
 echo "Installed test infrastructure having id: '$INFRA_ID'"
 
 # Checkpoint on Infrastructure
@@ -77,9 +75,8 @@ sed -i "s/Authorization:\ Bearer/Authorization:\ /" setup_app.sh
 
 # Retrieve the application numeric identifier (APP_ID) as last inserted application
 APP_ID=$(curl -H "Authorization: $TKN" $FGHOST/applications |\
-         jq '.applications[].id' |\
-         tail -n 1 |\
-         xargs echo) &&\
+         jq -r '.applications[].id' |\
+         tail -n 1) &&\
 echo "SayHello application successfully installed having id: '$APP_ID'"
 
 # Checkpoint on Applicaiton
@@ -123,8 +120,7 @@ while [ $CNT -lt $MAXCNT ]; do
     TASK_STATUS=$(curl -s\
                        -H "Authorization: $TKN"\
                        $FGHOST/tasks/$TASK_ID |\
-                       jq '.status' |\
-                       xargs echo) &&\
+                       jq -r '.status') &&\
     echo "Task having id: '$TASK_ID' has status: '$TASK_STATUS'"
     [ "$TASK_STATUS" = 'DONE' ] &&\
       break ||\
@@ -138,8 +134,7 @@ if [ "$TASK_STATUS" = "DONE" ]; then
                  -H "Authorization: $TKN"\
                  $FGHOST/tasks/$TASK_ID |\
                  jq '.output_files[]' |\
-                 jq '.url+"|"+.name' |\
-                 xargs echo) &&\
+                 jq -r '.url+"|"+.name') &&\
   for of in $OUTPUT_FILES; do\
     URL=$(echo $of | awk -F"|" '{ print $1 }');\
     FNM=$(echo $of | awk -F"|" '{ print $2 }');\
