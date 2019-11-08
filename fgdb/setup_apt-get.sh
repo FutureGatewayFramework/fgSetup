@@ -65,7 +65,7 @@ APTPACKAGES=(
 CMD="install_apt ${APTPACKAGES[@]}"
 exec_cmd "Failed installing required packages"
 
-# Mysql passwordless installation
+# MySQL passwordless installation
 out "Creating mysql DB with root password '"$FGDB_ROOTPWD"' ... " 1
 cat >$CMD_FILE <<EOF
 echo "mysql-server mysql-server/root_password password $FGDB_ROOTPWD" | sudo debconf-set-selections &&\
@@ -74,6 +74,16 @@ sudo apt-get install -y mysql-server
 EOF
 CMD=$(cat $CMD_FILE)
 exec_cmd "Unable to setup mysql-server"
+
+# MySQL rsa setup and bind address
+cat >$CMD_FILE <<EOF
+mysql_ssl_rsa_setup --datadir=/var/lib/mysql &&\
+echo "ssl-ca=/var/lib/mysql/cacert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf &&\
+echo "ssl-cert=/var/lib/mysql/server-cert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf &&\
+sed -i "s/#bind-address\t=\ 127.0.0.1/bind-address     =\ 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
+EOF
+CMD=$(cat $CMD_FILE)
+exec_cmd "FAiled to setup MySQL rsa and bind address"
 
 out "Starting mysql service ... " 1
 # Using restart since mysql could be already running
