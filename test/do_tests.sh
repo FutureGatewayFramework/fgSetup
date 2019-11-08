@@ -11,6 +11,12 @@ source fgSetup/setup_commons.sh
 # Load setup environment variables
 source fgSetup/setup_config.sh
 
+# Setup hostnames
+sudo su - -c "echo \"127.0.0.1   fgdb" >> /etc/hosts"
+sudo su - -c "echo \"127.0.0.1   fgapiserver" >> /etc/hosts"
+sudo su - -c "echo \"127.0.0.1   apiserverdaemon" >> /etc/hosts"
+sudo su - -c "echo \"127.0.0.1   sshnode" >> /etc/hosts"
+
 # Use a random generated password for empty FGDB_ROOTPWD
 [ "$FGDB_ROOTPWD" = "" ] &&\
   out "No database root password specified, using a random generated one" &&\
