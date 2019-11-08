@@ -76,14 +76,33 @@ CMD=$(cat $CMD_FILE)
 exec_cmd "Unable to setup mysql-server"
 
 # MySQL rsa setup and bind address
+CMD="sudo mysql_ssl_rsa_setup --datadir=/var/lib/mysql"
+exec_cmd "Failed to call MySQL rsa setup"
+
+# MySQL ssl-ca conf
 cat >$CMD_FILE <<EOF
-mysql_ssl_rsa_setup --datadir=/var/lib/mysql &&\
-echo "ssl-ca=/var/lib/mysql/cacert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf &&\
-echo "ssl-cert=/var/lib/mysql/server-cert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf &&\
-sed -i "s/#bind-address\t=\ 127.0.0.1/bind-address     =\ 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
+[ "\$(cat /etc/mysql/mysql.conf.d/mysqld.cnf | grep ssl-ca | wc -l)" -eq 0 ] &&\
+   sudo echo "ssl-ca=/var/lib/mysql/cacert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf ||\
+   echo "ssl-ca already configured"
 EOF
 CMD=$(cat $CMD_FILE)
-exec_cmd "FAiled to setup MySQL rsa and bind address"
+exec_cmd "Failed to configure ssl-ca in mysqld.cnf"
+
+# MySQL ssl-cert conf
+cat >$CMD_FILE <<EOF
+[ "\$(cat /etc/mysql/mysql.conf.d/mysqld.cnf | grep ssl-cert | wc -l)" -eq 0 ] &&\
+  sudo echo "ssl-cert=/var/lib/mysql/server-cert.pem" >> /etc/mysql/mysql.conf.d/mysqld.cnf ||\
+  echo "ssl-cert already configured"
+EOF
+CMD=$(cat $CMD_FILE)
+exec_cmd "Failed to configure ssl-cert in mysqld.cnf"
+
+# MySQL bind-address conf
+cat >$CMD_FILE <<EOF
+sudo sed -i "s/#bind-address\t=\ 127.0.0.1/bind-address     =\ 0.0.0.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
+EOF
+CMD=$(cat $CMD_FILE)
+exec_cmd "Failed to configure bind-address in mysqld.cnf"
 
 out "Starting mysql service ... " 1
 # Using restart since mysql could be already running
