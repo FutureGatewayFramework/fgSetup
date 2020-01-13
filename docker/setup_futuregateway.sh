@@ -23,6 +23,7 @@ FGDB_IMG=futuregateway/fgdb:0.3
 FGAPISERVER_IMG=futuregateway/fgapiserver:0.3
 FGAPISERVERDAEMON_IMG=futuregateway/apiserverdaemon:0.3
 SSHNODE_IMG=futuregateway/sshnode:0.2
+FGBASICDAEMON_IMG=futuregateway/fgbasicdaemon:0.1
 
 #
 # FutureGateway instance settings
@@ -159,6 +160,19 @@ services:
     volumes:
      - fgvolume_${FGINSTANCE_NAME}_iosandbox:${FGAPISRV_IOSANDBOX}
      - fgvolume_${FGINSTANCE_NAME}_appsdir:${FGAPISRV_APPSDIR}
+    networks:
+     - fg_${FGINSTANCE_NAME}_network
+    env_file:
+     - ${FGINSTANCE_ENVF}
+
+  fgbasicdaemon:
+    depends_on:
+     - fgdb
+    ports:
+     - "22022:22"
+    image: "$FGBASICDAEMON_IMG"
+    volumes:
+     - fgvolume_${FGINSTANCE_NAME}_iosandbox:${FGAPISRV_IOSANDBOX}
     networks:
      - fg_${FGINSTANCE_NAME}_network
     env_file:

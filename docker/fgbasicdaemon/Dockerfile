@@ -99,7 +99,7 @@ while [ 1 ]; do sleep 3600; done" > loop.sh &&\
     chmod +x loop.sh
 
 # Setup FGDB profile (all users)
-RUN echo "for f in \$(find $FG_DIR/.fgprofile -type f); do source \$f; done # FGLOADENV" >> /etc/profile.d/fg_profile.sh
+RUN sudo su - -c "echo \"for f in \\\$(find \\\$FG_DIR/.fgprofile -type f); do source \\\$f; done # FGLOADENV\" >> /etc/profile.d/fg_profile.sh"
 
 # Lasts forever
 ENTRYPOINT ["/bin/bash"]
